@@ -1,4 +1,4 @@
-[![Gitter chat](http://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/openzipkin/zipkin) [![Build Status](https://travis-ci.org/openzipkin/zipkin-reporter-java.svg?branch=master)](https://travis-ci.org/openzipkin/zipkin-reporter-java) [![Download](https://api.bintray.com/packages/openzipkin/maven/zipkin-reporter-java/images/download.svg) ](https://bintray.com/openzipkin/maven/zipkin-reporter-java/_latestVersion)
+[![Gitter chat](http://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/openzipkin/zipkin) [![Build Status](https://travis-ci.org/openzipkin/zipkin-sparkstreaming.svg?branch=master)](https://travis-ci.org/openzipkin/zipkin-sparkstreaming) [![Download](https://api.bintray.com/packages/openzipkin/maven/zipkin-sparkstreaming/images/download.svg) ](https://bintray.com/openzipkin/maven/zipkin-sparkstreaming/_latestVersion)
 
 # zipkin-sparkstreaming
 This is a streaming alternative to Zipkin's collector.
@@ -8,10 +8,10 @@ via Kafka. It does very little besides storing them for later query, and
 there are limited options for downsampling or otherwise.
 
 This project provides a more flexible pipeline, including the ability to
-* receive spans from other sources, like files.
+* receive spans from other sources, like files
 * perform dynamic sampling, like retain only latent or error traces
-* process data in real-time, like stream to alternate visualization tools
-* adjust data, like scrubbing private data
+* process data in real-time, like reporting or alternate visualization tools
+* adjust data, like scrubbing private data or normalizing service names
 
 ## Status
 Many features are incomplete. Please join us to help complete them.
