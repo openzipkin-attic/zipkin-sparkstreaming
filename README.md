@@ -1,4 +1,4 @@
-[![Gitter chat](http://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/openzipkin/zipkin) [![Build Status](https://travis-ci.org/openzipkin/zipkin-sparkstreaming.svg?branch=master)](https://travis-ci.org/openzipkin/zipkin-sparkstreaming) [![Download](https://api.bintray.com/packages/openzipkin/maven/zipkin-sparkstreaming/images/download.svg) ](https://bintray.com/openzipkin/maven/zipkin-sparkstreaming/_latestVersion)
+[![Gitter chat](http://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/openzipkin/zipkin) [![Build Status](https://circleci.com/gh/openzipkin/zipkin-azure.svg?style=svg)](https://circleci.com/gh/openzipkin/zipkin-sparkstreaming) [![Download](https://api.bintray.com/packages/openzipkin/maven/zipkin-sparkstreaming/images/download.svg) ](https://bintray.com/openzipkin/maven/zipkin-sparkstreaming/_latestVersion)
 
 # zipkin-sparkstreaming
 This is a streaming alternative to Zipkin's collector.
