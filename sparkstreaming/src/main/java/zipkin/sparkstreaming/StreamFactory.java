@@ -18,6 +18,6 @@ import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
 /** Returns a stream that includes encoded json or thrift lists */
-public interface MessageStreamFactory extends Serializable {
+public interface StreamFactory extends Serializable {
   JavaDStream<byte[]> create(JavaStreamingContext jsc);
 }

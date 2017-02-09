@@ -45,6 +45,7 @@ public abstract class SparkStreamingJob implements Closeable {
         .sparkMaster("local[*]")
         .sparkJars(Collections.emptyList())
         .sparkProperties(sparkProperties)
+        .adjusters(Collections.emptyList())
         .batchDuration(10_000);
   }
 
@@ -67,10 +68,13 @@ public abstract class SparkStreamingJob implements Closeable {
     Builder batchDuration(long batchDurationMillis);
 
     /** Produces a stream of serialized span messages (thrift or json lists) */
-    Builder messageStreamFactory(MessageStreamFactory messageStreamFactory);
+    Builder streamFactory(StreamFactory streamFactory);
+
+    /** Conditionally adjusts spans grouped by trace ID. For example, pruning data */
+    Builder adjusters(List<Adjuster> adjusters);
 
     /** Accepts spans grouped by trace ID. For example, writing to a {@link StorageComponent} */
-    Builder traceConsumer(TraceConsumer traceConsumer);
+    Builder consumer(Consumer consumer);
 
     SparkStreamingJob build();
   }
@@ -83,9 +87,11 @@ public abstract class SparkStreamingJob implements Closeable {
 
   abstract long batchDuration();
 
-  abstract MessageStreamFactory messageStreamFactory();
+  abstract StreamFactory streamFactory();
 
-  abstract TraceConsumer traceConsumer();
+  abstract List<Adjuster> adjusters();
+
+  abstract Consumer consumer();
 
   final AtomicBoolean started = new AtomicBoolean(false);
 
@@ -106,8 +112,9 @@ public abstract class SparkStreamingJob implements Closeable {
     if (!started.compareAndSet(false, true)) return this;
 
     streamSpansToStorage(
-        messageStreamFactory().create(jsc()),
-        traceConsumer()
+        streamFactory().create(jsc()),
+        adjusters(),
+        consumer()
     );
 
     jsc().start();
@@ -122,10 +129,11 @@ public abstract class SparkStreamingJob implements Closeable {
   // NOTE: this is intentionally static to remind us that all state passed in must be serializable
   // Otherwise, tasks cannot be distributed across the cluster.
   static void streamSpansToStorage(
-      JavaDStream<byte[]> messageStream,
-      TraceConsumer traceConsumer
+      JavaDStream<byte[]> stream,
+      List<Adjuster> adjusters,
+      Consumer consumer
   ) {
-    JavaDStream<Span> spans = messageStream
+    JavaDStream<Span> spans = stream
         .filter(bytes -> bytes.length > 0)
         .flatMap(bytes -> {
           try {
@@ -146,7 +154,10 @@ public abstract class SparkStreamingJob implements Closeable {
       rdd.values().foreachPartition(p -> {
         while (p.hasNext()) {
           Iterable<Span> trace = p.next();
-          traceConsumer.accept(p.next());
+          for (Adjuster adjuster : adjusters) {
+            trace = adjuster.adjust(trace);
+          }
+          consumer.accept(p.next());
         }
       });
     });
@@ -176,8 +187,8 @@ public abstract class SparkStreamingJob implements Closeable {
   @Override public void close() throws IOException {
     jsc().close();
     // not sure how to get spark to close things
-    if (traceConsumer() instanceof Closeable) {
-      ((Closeable) traceConsumer()).close();
+    if (consumer() instanceof Closeable) {
+      ((Closeable) consumer()).close();
     }
   }
 

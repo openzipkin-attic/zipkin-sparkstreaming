@@ -26,6 +26,9 @@
 
   <modules>
     <module>sparkstreaming</module>
+    <module>stream</module>
+    <module>adjuster</module>
+    <module>consumer</module>
     <module>autoconfigure</module>
     <module>sparkstreaming-job</module>
   </modules>
@@ -69,7 +72,8 @@
   <scm>
     <url>https://github.com/openzipkin/zipkin-sparkstreaming</url>
     <connection>scm:git:https://github.com/openzipkin/zipkin-sparkstreaming.git</connection>
-    <developerConnection>scm:git:https://github.com/openzipkin/zipkin-sparkstreaming.git</developerConnection>
+    <developerConnection>scm:git:https://github.com/openzipkin/zipkin-sparkstreaming.git
+    </developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -109,12 +113,6 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>zipkin-autoconfigure-sparkstreaming</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>zipkin-sparkstreaming-autoconfigure-adjuster-finagle</artifactId>
         <version>${project.version}</version>
       </dependency>
 

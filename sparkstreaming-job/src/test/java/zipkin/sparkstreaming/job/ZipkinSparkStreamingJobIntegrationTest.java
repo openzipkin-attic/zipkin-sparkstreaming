@@ -13,23 +13,32 @@
  */
 package zipkin.sparkstreaming.job;
 
+import java.io.IOException;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import zipkin.sparkstreaming.SparkStreamingJob;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ZipkinSparkStreamingJob.class)
+@SpringBootTest(
+    classes = ZipkinSparkStreamingJob.class,
+    properties = {
+    }
+)
 public class ZipkinSparkStreamingJobIntegrationTest {
 
-  @Autowired
-  zipkin.sparkstreaming.SparkStreamingJob sparkStreamingJob;
+  @Autowired SparkStreamingJob job;
 
-  @Test
-  public void injects() throws InterruptedException {
-    assertThat(sparkStreamingJob).isNotNull();
+  @After public void close() throws IOException {
+    if (job != null) job.close();
+  }
+
+  @Test public void wiresJob() {
+    assertThat(job).isNotNull();
   }
 }

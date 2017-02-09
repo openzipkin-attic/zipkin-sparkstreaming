@@ -54,12 +54,13 @@ public class ZipkinSparkStreamingJobAutoConfigurationTest {
 
     job = context.getBean(SparkStreamingJob.class);
     assertThat(job).isNotNull();
+    assertThat(job.adjusters()).isEmpty();
   }
 
   @Configuration
   static class DummyConfiguration {
 
-    @Bean MessageStreamFactory messagesFactory() {
+    @Bean StreamFactory streamFactory() {
       return jsc -> {
         Queue<JavaRDD<byte[]>> rddQueue = new LinkedList<>();
         byte[] oneTrace = Codec.JSON.writeSpans(TestObjects.TRACE);
@@ -68,10 +69,41 @@ public class ZipkinSparkStreamingJobAutoConfigurationTest {
       };
     }
 
-    @Bean TraceConsumer traceConsumer() {
+    @Bean Consumer consumer() {
       return trace -> {
         System.err.println(trace);
       };
     }
+  }
+
+  @Configuration
+  static class AdjusterConfiguration {
+
+    static Adjuster one = new Adjuster() {
+    };
+    static Adjuster two = new Adjuster() {
+    };
+
+    @Bean Adjuster one() {
+      return one;
+    }
+
+    @Bean Adjuster two() {
+      return two;
+    }
+  }
+
+  @Test
+  public void usesMultipleAdjusters() throws IOException {
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        DummyConfiguration.class,
+        AdjusterConfiguration.class,
+        ZipkinSparkStreamingAutoConfiguration.class);
+    context.refresh();
+
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job).isNotNull();
+    assertThat(job.adjusters())
+        .containsExactly(AdjusterConfiguration.one, AdjusterConfiguration.two);
   }
 }

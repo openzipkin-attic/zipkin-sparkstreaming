@@ -30,9 +30,9 @@ import zipkin.Codec;
 import zipkin.Endpoint;
 import zipkin.Span;
 import zipkin.autoconfigure.sparkstreaming.ZipkinSparkStreamingAutoConfiguration;
-import zipkin.sparkstreaming.MessageStreamFactory;
+import zipkin.sparkstreaming.Consumer;
 import zipkin.sparkstreaming.SparkStreamingJob;
-import zipkin.sparkstreaming.TraceConsumer;
+import zipkin.sparkstreaming.StreamFactory;
 
 import static java.util.Arrays.asList;
 
@@ -42,19 +42,21 @@ import static java.util.Arrays.asList;
     ZipkinSparkStreamingJob.DummyConfiguration.class
 })
 public class ZipkinSparkStreamingJob {
+
   public static void main(String[] args) throws UnsupportedEncodingException {
-    System.setProperty("zipkin.sparkstreaming.spark-jars", pathToUberJar());
-    new SpringApplicationBuilder(ZipkinSparkStreamingJob.class).run(args)
+    new SpringApplicationBuilder(ZipkinSparkStreamingJob.class)
+        .properties("zipkin.sparkstreaming.spark-jars", pathToUberJar())
+        .run(args)
         .getBean(SparkStreamingJob.class).awaitTermination();
   }
 
-  // We need to use eventually us auto-configuration for MessageStreamFactory and TraceConsumer.
+  // We need to use eventually us auto-configuration for StreamFactory and Consumer.
   // This is an example, that seeds a single span (then loops forever since no more spans arrive).
   @Configuration
   static class DummyConfiguration {
 
     // This creates only one trace, so isn't that interesting.
-    @Bean MessageStreamFactory messagesFactory() {
+    @Bean StreamFactory streamFactory() {
       return jsc -> {
         Queue<JavaRDD<byte[]>> rddQueue = new LinkedList<>();
         byte[] oneSpan = Codec.JSON.writeSpans(asList(span(1L)));
@@ -63,7 +65,7 @@ public class ZipkinSparkStreamingJob {
       };
     }
 
-    @Bean TraceConsumer traceConsumer() {
+    @Bean Consumer consumer() {
       return trace -> System.err.println(trace);
     }
   }

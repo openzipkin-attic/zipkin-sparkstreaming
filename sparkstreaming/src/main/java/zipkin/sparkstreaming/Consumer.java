@@ -17,6 +17,6 @@ import java.io.Serializable;
 import zipkin.Span;
 
 /** Implementations must be serializable, which implies you need to feed them static configuration */
-public interface TraceConsumer extends Serializable {
+public interface Consumer extends Serializable {
   void accept(Iterable<Span> trace);
 }

@@ -13,27 +13,35 @@
  */
 package zipkin.autoconfigure.sparkstreaming;
 
+import java.util.Collections;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import zipkin.sparkstreaming.MessageStreamFactory;
+import zipkin.sparkstreaming.StreamFactory;
 import zipkin.sparkstreaming.SparkStreamingJob;
-import zipkin.sparkstreaming.TraceConsumer;
+import zipkin.sparkstreaming.Adjuster;
+import zipkin.sparkstreaming.Consumer;
 
 @Configuration
 @EnableConfigurationProperties(ZipkinSparkStreamingProperties.class)
-@ConditionalOnBean({MessageStreamFactory.class, TraceConsumer.class})
+@ConditionalOnBean({StreamFactory.class, Consumer.class})
 public class ZipkinSparkStreamingAutoConfiguration {
+
+  @Autowired(required = false)
+  List<Adjuster> adjusters = Collections.emptyList();
 
   @Bean SparkStreamingJob sparkStreaming(
       ZipkinSparkStreamingProperties sparkStreaming,
-      MessageStreamFactory messageStreamFactory,
-      TraceConsumer traceConsumer
+      StreamFactory streamFactory,
+      Consumer consumer
   ) {
     return sparkStreaming.toBuilder()
-        .messageStreamFactory(messageStreamFactory)
-        .traceConsumer(traceConsumer)
+        .streamFactory(streamFactory)
+        .adjusters(adjusters)
+        .consumer(consumer)
         .build()
         .start();
   }
