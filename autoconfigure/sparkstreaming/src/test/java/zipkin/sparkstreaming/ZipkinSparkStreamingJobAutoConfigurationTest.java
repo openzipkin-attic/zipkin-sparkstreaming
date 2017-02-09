@@ -33,28 +33,27 @@ import zipkin.autoconfigure.sparkstreaming.ZipkinSparkStreamingAutoConfiguration
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ZipkinSparkStreamingJobAutoConfigurationTest {
-
-  AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
+  AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+  SparkStreamingJob job;
+
   @After
-  public void close() {
+  public void close() throws IOException {
+    if (job != null) job.close();
     context.close();
   }
 
   @Test
   public void providesSparkStreaming() throws IOException {
-    context = new AnnotationConfigApplicationContext();
     context.register(PropertyPlaceholderAutoConfiguration.class,
         DummyConfiguration.class,
         ZipkinSparkStreamingAutoConfiguration.class);
     context.refresh();
 
-    SparkStreamingJob collector = context.getBean(SparkStreamingJob.class);
-    assertThat(collector).isNotNull();
-    collector.close();
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job).isNotNull();
   }
 
   @Configuration

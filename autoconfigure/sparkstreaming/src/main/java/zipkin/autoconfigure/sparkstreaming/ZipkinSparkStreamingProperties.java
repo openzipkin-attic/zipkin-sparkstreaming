@@ -13,24 +13,17 @@
  */
 package zipkin.autoconfigure.sparkstreaming;
 
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import zipkin.sparkstreaming.SparkStreamingJob;
 
 @ConfigurationProperties("zipkin.sparkstreaming")
 public class ZipkinSparkStreamingProperties {
-  String sparkMaster = "local[*]";
-  String[] sparkJars;
-  final Map<String, String> sparkProperties = new LinkedHashMap<>();
-  long batchDuration = 10;
-
-  ZipkinSparkStreamingProperties() {
-    sparkProperties.put("spark.ui.enabled", "false");
-    // avoids strange class not found bug on Logger.setLevel
-    sparkProperties.put("spark.akka.logLifecycleEvents", "true");
-  }
+  String sparkMaster;
+  List<String> sparkJars;
+  Map<String, String> sparkProperties;
+  Long batchDuration;
 
   public String getSparkMaster() {
     return sparkMaster;
@@ -40,16 +33,22 @@ public class ZipkinSparkStreamingProperties {
     this.sparkMaster = "".equals(sparkMaster) ? null : sparkMaster;
   }
 
-  public String[] getSparkJars() {
+  public List<String> getSparkJars() {
     return sparkJars;
   }
 
-  public void setSparkJars(String[] sparkJars) {
-    this.sparkJars = sparkJars;
+  public void setSparkJars(List<String> sparkJars) {
+    if (sparkJars != null && !sparkJars.isEmpty()) this.sparkJars = sparkJars;
   }
 
   public Map<String, String> getSparkProperties() {
     return sparkProperties;
+  }
+
+  public void setSparkProperties(Map<String, String> sparkProperties) {
+    if (sparkProperties != null && !sparkProperties.isEmpty()) {
+      this.sparkProperties = sparkProperties;
+    }
   }
 
   public long getBatchDuration() {
@@ -61,12 +60,11 @@ public class ZipkinSparkStreamingProperties {
   }
 
   SparkStreamingJob.Builder toBuilder() {
-    SparkStreamingJob.Builder builder = SparkStreamingJob.newBuilder();
-    System.err.println(sparkMaster);
-    builder.sparkMaster(sparkMaster);
-    builder.sparkJars(sparkJars);
-    builder.sparkProperties(sparkProperties);
-    builder.batchDuration(10, TimeUnit.SECONDS);
-    return builder;
+    SparkStreamingJob.Builder result = SparkStreamingJob.newBuilder();
+    if (sparkMaster != null) result.sparkMaster(sparkMaster);
+    if (sparkJars != null) result.sparkJars(sparkJars);
+    if (sparkProperties != null) result.sparkProperties(sparkProperties);
+    if (batchDuration != null) result.batchDuration(batchDuration);
+    return result;
   }
 }

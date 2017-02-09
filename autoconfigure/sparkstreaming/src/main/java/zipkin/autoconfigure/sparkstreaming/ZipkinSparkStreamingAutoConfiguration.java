@@ -26,11 +26,13 @@ import zipkin.sparkstreaming.TraceConsumer;
 @ConditionalOnBean({MessageStreamFactory.class, TraceConsumer.class})
 public class ZipkinSparkStreamingAutoConfiguration {
 
-  @Bean
-  SparkStreamingJob sparkStreaming(ZipkinSparkStreamingProperties sparkStreaming,
-      MessageStreamFactory messageStreamFactory, TraceConsumer traceConsumer) {
+  @Bean SparkStreamingJob sparkStreaming(
+      ZipkinSparkStreamingProperties sparkStreaming,
+      MessageStreamFactory messageStreamFactory,
+      TraceConsumer traceConsumer
+  ) {
     return sparkStreaming.toBuilder()
-        .spanMessagesFactory(messageStreamFactory)
+        .messageStreamFactory(messageStreamFactory)
         .traceConsumer(traceConsumer)
         .build()
         .start();

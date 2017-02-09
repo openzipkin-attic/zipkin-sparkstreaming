@@ -23,8 +23,8 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>zipkin-autoconfigure-parent</artifactId>
-  <name>Zipkin Auto Configuration: Parent</name>
+  <artifactId>zipkin-sparkstreaming-autoconfigure-parent</artifactId>
+  <name>Zipkin Spark Streaming Auto Configuration</name>
 
   <packaging>pom</packaging>
 
@@ -35,6 +35,19 @@
   <modules>
     <module>sparkstreaming</module>
   </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <!-- Import dependency management from Spring Boot -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
