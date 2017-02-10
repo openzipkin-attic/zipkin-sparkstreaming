@@ -21,6 +21,7 @@ import zipkin.sparkstreaming.stream.kafka.ZookeeperBootstrapServers;
 @ConfigurationProperties("zipkin.sparkstreaming.stream.kafka")
 public class ZipkinKafkaStreamFactoryProperties {
   private String topic;
+  private String groupId;
   private List<String> bootstrapServers;
   private Zookeeper zookeeper = new Zookeeper();
 
@@ -30,6 +31,14 @@ public class ZipkinKafkaStreamFactoryProperties {
 
   public void setTopic(String topic) {
     this.topic = emptyToNull(topic);
+  }
+
+  public String getGroupId() {
+    return groupId;
+  }
+
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
   }
 
   public List<String> getBootstrapServers() {
@@ -85,6 +94,7 @@ public class ZipkinKafkaStreamFactoryProperties {
   KafkaStreamFactory.Builder toBuilder() {
     KafkaStreamFactory.Builder result = KafkaStreamFactory.newBuilder();
     if (topic != null) result.topic(topic);
+    if (groupId != null) result.groupId(groupId);
     if (bootstrapServers != null) result.bootstrapServers(bootstrapServers);
     if (zookeeper.getConnectServers() == null) return result;
 

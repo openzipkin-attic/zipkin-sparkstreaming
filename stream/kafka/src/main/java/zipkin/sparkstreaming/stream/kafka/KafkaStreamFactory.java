@@ -37,17 +37,22 @@ public abstract class KafkaStreamFactory implements StreamFactory {
 
   public static Builder newBuilder() {
     return new AutoValue_KafkaStreamFactory.Builder()
-        .topic("zipkin");
+        .topic("zipkin")
+        .groupId("zipkin");
   }
 
   @AutoValue.Builder
   public static abstract class Builder {
 
-    /**  Kafka topic encoded lists of spans are be consumed from. Defaults to "zipkin" */
+    /** Kafka topic encoded lists of spans are be consumed from. Defaults to "zipkin" */
     public abstract Builder topic(String topic);
 
+    /** Consumer group this process is consuming on behalf of. Defaults to "zipkin" */
+    public abstract Builder groupId(String groupId);
+
     /**
-     * Initial set of kafka servers to connect to; others may be discovered. Values are in host:port syntax. No default.
+     * Initial set of kafka servers to connect to; others may be discovered. Values are in host:port
+     * syntax. No default.
      *
      * @see ProducerConfig#BOOTSTRAP_SERVERS_CONFIG
      */
@@ -80,6 +85,8 @@ public abstract class KafkaStreamFactory implements StreamFactory {
 
   abstract String topic();
 
+  abstract String groupId();
+
   abstract BootstrapServers bootstrapServers();
 
   @Override public JavaDStream<byte[]> create(JavaStreamingContext jsc) {
@@ -98,6 +105,7 @@ public abstract class KafkaStreamFactory implements StreamFactory {
   Map<String, String> kafkaParams() {
     Map<String, String> kafkaParams = new LinkedHashMap<>();
     kafkaParams.put("metadata.broker.list", StringUtils.join(bootstrapServers().get(), ","));
+    kafkaParams.put("group.id", groupId());
     return Collections.unmodifiableMap(kafkaParams);
   }
 

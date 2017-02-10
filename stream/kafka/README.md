@@ -29,6 +29,7 @@ have a prefix of "zipkin.sparkstreaming.stream.kafka"
 Property | Default | Description
 --- | --- | ---
 topic | zipkin | Kafka topic encoded lists of spans are be consumed from.
+group-id | zipkin | Consumer group this process is consuming on behalf of.
 bootstrap-servers | none | Initial set of kafka servers to connect to; others may be discovered. Values are in comma-separated host:port syntax. Ex "host1:9092,host2:9092".
 zookeeper.connect-servers | none | Looks up bootstrap-servers from Zookeeper. Values are in comma-separated host:port syntax. Ex "host1:2181,host2:2181".
 zookeeper.connect-suffix | "" | Optional chroot path used as a suffix for connect string.

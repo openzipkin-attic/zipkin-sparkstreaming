@@ -14,26 +14,15 @@
 package zipkin.sparkstreaming.job;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
-import org.apache.spark.api.java.JavaRDD;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import zipkin.BinaryAnnotation;
-import zipkin.Codec;
-import zipkin.Endpoint;
-import zipkin.Span;
 import zipkin.sparkstreaming.Consumer;
 import zipkin.sparkstreaming.SparkStreamingJob;
-import zipkin.sparkstreaming.StreamFactory;
 import zipkin.sparkstreaming.autoconfigure.stream.kafka.ZipkinKafkaStreamFactoryAutoConfiguration;
-
-import static java.util.Arrays.asList;
 
 @SpringBootApplication
 @Import({
@@ -59,13 +48,5 @@ public class ZipkinSparkStreamingJob {
         System.err.println(spansSharingTraceId);
       };
     }
-  }
-
-  static Span span(long traceId) {
-    Endpoint e = Endpoint.builder().serviceName("service").ipv4(127 << 24 | 1).port(8080).build();
-    return Span.builder().traceId(traceId).id(traceId)
-        .timestamp(System.currentTimeMillis() * 1000).duration(200L)
-        .name("hello").addBinaryAnnotation(BinaryAnnotation.create("lc", "", e))
-        .build();
   }
 }
