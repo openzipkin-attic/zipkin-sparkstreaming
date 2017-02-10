@@ -81,21 +81,6 @@ public class AdjusterTest {
   }
 
   @Test
-  public void shouldDrop() {
-    // sanity check
-    assertThat(TestObjects.TRACE).hasSize(3);
-
-    Adjuster adjuster = new Adjuster() {
-      @Override protected boolean shouldDrop(Span span) {
-        return TestObjects.TRACE.get(1).equals(span);
-      }
-    };
-
-    assertThat(adjuster.adjust(TestObjects.TRACE))
-        .containsExactly(TestObjects.TRACE.get(0), TestObjects.TRACE.get(2));
-  }
-
-  @Test
   public void adjust() {
     Adjuster adjuster = new Adjuster() {
       @Override protected Span adjust(Span span) {
