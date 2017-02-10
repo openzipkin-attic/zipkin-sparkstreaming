@@ -35,6 +35,7 @@
   </properties>
 
   <modules>
+    <module>stream-kafka</module>
   </modules>
 
   <dependencyManagement>

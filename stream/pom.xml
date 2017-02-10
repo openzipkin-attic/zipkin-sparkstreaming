@@ -32,6 +32,7 @@
   </properties>
 
   <modules>
+    <module>kafka</module>
   </modules>
 
   <dependencies>

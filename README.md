@@ -23,9 +23,12 @@ You have to build locally right now. We'll improve this section
 # make the jar
 ./mvnw clean install
 # run local
-java -jar ./sparkstreaming-job/target/zipkin-sparkstreaming-job-*.jar
-# run remote
-java -jar ./sparkstreaming-job/target/zipkin-sparkstreaming-job-*.jar --zipkin.sparkstreaming.sparkMaster=spark://acole:7077
+java -jar ./sparkstreaming-job/target/zipkin-sparkstreaming-job-*.jar \
+  --zipkin.sparkstreaming.stream.kafka.bootstrap-servers=127.0.0.1:9092
+# run in a cluster
+java -jar ./sparkstreaming-job/target/zipkin-sparkstreaming-job-*.jar \
+  --zipkin.sparkstreaming.stream.kafka.bootstrap-servers=127.0.0.1:9092 \
+  --zipkin.sparkstreaming.sparkMaster=spark://acole:7077
 ```
 
 ## Key Components
@@ -35,7 +38,9 @@ A stream is a source of json or thrift encoded span messages.
 
 For example, a message stream could be a Kafka topic named "zipkin"
 
-TODO: briefly describe and link to built-in message stream factories
+Stream | Description
+--- | --- | ---
+[Kafka](./stream/kafka) | Ingests spans from a Kafka topic.
 
 ### Adjuster
 An adjuster conditionally changes spans sharing the same trace ID.

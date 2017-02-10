@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import org.apache.spark.api.java.JavaRDD;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,13 +31,16 @@ import zipkin.Span;
 import zipkin.sparkstreaming.Consumer;
 import zipkin.sparkstreaming.SparkStreamingJob;
 import zipkin.sparkstreaming.StreamFactory;
+import zipkin.sparkstreaming.autoconfigure.stream.kafka.ZipkinKafkaStreamFactoryAutoConfiguration;
 
 import static java.util.Arrays.asList;
 
 @SpringBootApplication
 @Import({
     ZipkinSparkStreamingConfiguration.class,
-    ZipkinSparkStreamingJob.TemporaryConfiguration.class
+    ZipkinSparkStreamingJob.TemporaryConfiguration.class,
+    // These need to be explicity included as the shade plugin squashes spring.properties
+    ZipkinKafkaStreamFactoryAutoConfiguration.class
 })
 public class ZipkinSparkStreamingJob {
 
@@ -50,18 +54,7 @@ public class ZipkinSparkStreamingJob {
   // This is an example, that seeds a single span (then loops forever since no more spans arrive).
   @Configuration
   static class TemporaryConfiguration {
-
-    // This creates only one trace, so isn't that interesting.
-    @Bean StreamFactory streamFactory() {
-      return jsc -> {
-        Queue<JavaRDD<byte[]>> rddQueue = new LinkedList<>();
-        byte[] oneSpan = Codec.JSON.writeSpans(asList(span(1L)));
-        rddQueue.add(jsc.sparkContext().parallelize(Collections.singletonList(oneSpan)));
-        return jsc.queueStream(rddQueue);
-      };
-    }
-
-    @Bean Consumer consumer() {
+    @Bean @ConditionalOnMissingBean Consumer consumer() {
       return spansSharingTraceId -> {
         System.err.println(spansSharingTraceId);
       };
