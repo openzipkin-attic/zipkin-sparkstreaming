@@ -129,6 +129,18 @@
       </dependency>
 
       <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>zipkin-sparkstreaming-adjuster-finagle</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>zipkin-sparkstreaming-autoconfigure-adjuster-finagle</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>io.zipkin.java</groupId>
         <artifactId>zipkin</artifactId>
         <version>${zipkin.version}</version>

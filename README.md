@@ -48,7 +48,9 @@ An adjuster conditionally changes spans sharing the same trace ID.
 You can make adjusters to fixup data reported by instrumentation, or to
 scrub private data.
 
-TODO: briefly describe and link to built-in adjusters
+Adjuster | Description
+--- | --- | ---
+[Finagle](./adjuster/finagle) | Fixes up spans reported by [Finagle](https://github.com/twitter/finagle/tree/develop/finagle-zipkin).
 
 ### Consumer
 A consumer is an end-recipient of potentially adjusted spans sharing the

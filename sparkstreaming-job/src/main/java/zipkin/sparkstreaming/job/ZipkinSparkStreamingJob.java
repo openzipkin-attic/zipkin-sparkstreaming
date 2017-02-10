@@ -13,7 +13,6 @@
  */
 package zipkin.sparkstreaming.job;
 
-import java.io.UnsupportedEncodingException;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -22,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import zipkin.sparkstreaming.Consumer;
 import zipkin.sparkstreaming.SparkStreamingJob;
+import zipkin.sparkstreaming.autoconfigure.adjuster.finagle.ZipkinFinagleAdjusterAutoConfiguration;
 import zipkin.sparkstreaming.autoconfigure.stream.kafka.ZipkinKafkaStreamFactoryAutoConfiguration;
 
 @SpringBootApplication
@@ -29,18 +29,18 @@ import zipkin.sparkstreaming.autoconfigure.stream.kafka.ZipkinKafkaStreamFactory
     ZipkinSparkStreamingConfiguration.class,
     ZipkinSparkStreamingJob.TemporaryConfiguration.class,
     // These need to be explicity included as the shade plugin squashes spring.properties
-    ZipkinKafkaStreamFactoryAutoConfiguration.class
+    ZipkinKafkaStreamFactoryAutoConfiguration.class,
+    ZipkinFinagleAdjusterAutoConfiguration.class
 })
 public class ZipkinSparkStreamingJob {
 
-  public static void main(String[] args) throws UnsupportedEncodingException {
+  public static void main(String[] args) {
     new SpringApplicationBuilder(ZipkinSparkStreamingJob.class)
         .run(args)
         .getBean(SparkStreamingJob.class).awaitTermination();
   }
 
-  // We need to use eventually us auto-configuration for StreamFactory and Consumer.
-  // This is an example, that seeds a single span (then loops forever since no more spans arrive).
+  // What's left is to make a storage consumer
   @Configuration
   static class TemporaryConfiguration {
     @Bean @ConditionalOnMissingBean Consumer consumer() {
