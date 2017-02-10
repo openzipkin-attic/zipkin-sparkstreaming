@@ -14,8 +14,6 @@
 package zipkin.sparkstreaming.job;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -29,7 +27,6 @@ import zipkin.BinaryAnnotation;
 import zipkin.Codec;
 import zipkin.Endpoint;
 import zipkin.Span;
-import zipkin.autoconfigure.sparkstreaming.ZipkinSparkStreamingAutoConfiguration;
 import zipkin.sparkstreaming.Consumer;
 import zipkin.sparkstreaming.SparkStreamingJob;
 import zipkin.sparkstreaming.StreamFactory;
@@ -38,14 +35,13 @@ import static java.util.Arrays.asList;
 
 @SpringBootApplication
 @Import({
-    ZipkinSparkStreamingAutoConfiguration.class,
-    ZipkinSparkStreamingJob.DummyConfiguration.class
+    ZipkinSparkStreamingConfiguration.class,
+    ZipkinSparkStreamingJob.TemporaryConfiguration.class
 })
 public class ZipkinSparkStreamingJob {
 
   public static void main(String[] args) throws UnsupportedEncodingException {
     new SpringApplicationBuilder(ZipkinSparkStreamingJob.class)
-        .properties("zipkin.sparkstreaming.spark-jars", pathToUberJar())
         .run(args)
         .getBean(SparkStreamingJob.class).awaitTermination();
   }
@@ -53,7 +49,7 @@ public class ZipkinSparkStreamingJob {
   // We need to use eventually us auto-configuration for StreamFactory and Consumer.
   // This is an example, that seeds a single span (then loops forever since no more spans arrive).
   @Configuration
-  static class DummyConfiguration {
+  static class TemporaryConfiguration {
 
     // This creates only one trace, so isn't that interesting.
     @Bean StreamFactory streamFactory() {
@@ -66,7 +62,9 @@ public class ZipkinSparkStreamingJob {
     }
 
     @Bean Consumer consumer() {
-      return trace -> System.err.println(trace);
+      return spansSharingTraceId -> {
+        System.err.println(spansSharingTraceId);
+      };
     }
   }
 
@@ -76,10 +74,5 @@ public class ZipkinSparkStreamingJob {
         .timestamp(System.currentTimeMillis() * 1000).duration(200L)
         .name("hello").addBinaryAnnotation(BinaryAnnotation.create("lc", "", e))
         .build();
-  }
-
-  static String pathToUberJar() throws UnsupportedEncodingException {
-    URL jarFile = ZipkinSparkStreamingJob.class.getProtectionDomain().getCodeSource().getLocation();
-    return URLDecoder.decode(jarFile.getPath(), "UTF-8");
   }
 }

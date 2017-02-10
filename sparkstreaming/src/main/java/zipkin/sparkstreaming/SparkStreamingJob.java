@@ -153,11 +153,11 @@ public abstract class SparkStreamingJob implements Closeable {
     tracesById.foreachRDD(rdd -> {
       rdd.values().foreachPartition(p -> {
         while (p.hasNext()) {
-          Iterable<Span> trace = p.next();
+          Iterable<Span> spansSharingTraceId = p.next();
           for (Adjuster adjuster : adjusters) {
-            trace = adjuster.adjust(trace);
+            spansSharingTraceId = adjuster.adjust(spansSharingTraceId);
           }
-          consumer.accept(p.next());
+          consumer.accept(spansSharingTraceId);
         }
       });
     });

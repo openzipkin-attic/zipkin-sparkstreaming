@@ -51,11 +51,6 @@
     </dependency>
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>zipkin-autoconfigure-sparkstreaming</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-autoconfigure</artifactId>
     </dependency>
@@ -63,6 +58,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
+      <!-- when using shade, spring-boot-starter-logging doesn't work. use logback directly -->
       <exclusions>
         <exclusion>
           <groupId>org.springframework.boot</groupId>
@@ -87,7 +83,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>2.4.3</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -97,10 +93,12 @@
             <configuration>
               <transformers>
                 <!-- Protect against http://stackoverflow.com/questions/31011243/no-configuration-setting-found-for-key-akka-version -->
-                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                <transformer
+                    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                   <resource>reference.conf</resource>
                 </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer
+                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>zipkin.sparkstreaming.job.ZipkinSparkStreamingJob</mainClass>
                 </transformer>
               </transformers>
@@ -110,6 +108,18 @@
                 <!-- Prevent minification from excluding classes looked up by name -->
                 <filter>
                   <artifact>org.springframework:spring-context</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>org.springframework.boot:*</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>com.fasterxml.jackson.core:jackson-databind</artifact>
                   <includes>
                     <include>**</include>
                   </includes>
@@ -158,20 +168,6 @@
                 </filter>
                 <filter>
                   <artifact>com.typesafe.akka:*</artifact>
-                  <includes>
-                    <include>**</include>
-                  </includes>
-                </filter>
-                <filter>
-                  <!-- org.elasticsearch.spark.sql.SparkSQLCompatibilityLevel -->
-                  <artifact>org.elasticsearch:elasticsearch-spark-13_${scala.binary.version}</artifact>
-                  <includes>
-                    <include>**</include>
-                  </includes>
-                </filter>
-                <filter>
-                  <!-- elasticsearch -->
-                  <artifact>commons-httpclient:commons-httpclient</artifact>
                   <includes>
                     <include>**</include>
                   </includes>

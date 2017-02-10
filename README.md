@@ -46,7 +46,8 @@ scrub private data.
 TODO: briefly describe and link to built-in adjusters
 
 ### Consumer
-A consumer is an end-recipient of potentially adjusted traces.
+A consumer is an end-recipient of potentially adjusted spans sharing the
+same trace ID.
 
 This could be a Zipkin storage component, like Elasticsearch, or another
 sink, such as a streaming visualization tool.

@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import zipkin.Codec;
 import zipkin.TestObjects;
-import zipkin.autoconfigure.sparkstreaming.ZipkinSparkStreamingAutoConfiguration;
+import zipkin.sparkstreaming.job.ZipkinSparkStreamingConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,12 +49,11 @@ public class ZipkinSparkStreamingJobAutoConfigurationTest {
   public void providesSparkStreaming() throws IOException {
     context.register(PropertyPlaceholderAutoConfiguration.class,
         DummyConfiguration.class,
-        ZipkinSparkStreamingAutoConfiguration.class);
+        ZipkinSparkStreamingConfiguration.class);
     context.refresh();
 
     job = context.getBean(SparkStreamingJob.class);
     assertThat(job).isNotNull();
-    assertThat(job.adjusters()).isEmpty();
   }
 
   @Configuration
@@ -94,16 +93,16 @@ public class ZipkinSparkStreamingJobAutoConfigurationTest {
   }
 
   @Test
-  public void usesMultipleAdjusters() throws IOException {
+  public void providesAdjusters() throws IOException {
     context.register(PropertyPlaceholderAutoConfiguration.class,
         DummyConfiguration.class,
         AdjusterConfiguration.class,
-        ZipkinSparkStreamingAutoConfiguration.class);
+        ZipkinSparkStreamingConfiguration.class);
     context.refresh();
 
     job = context.getBean(SparkStreamingJob.class);
     assertThat(job).isNotNull();
     assertThat(job.adjusters())
-        .containsExactly(AdjusterConfiguration.one, AdjusterConfiguration.two);
+        .contains(AdjusterConfiguration.one, AdjusterConfiguration.two);
   }
 }
