@@ -24,11 +24,15 @@ You have to build locally right now. We'll improve this section
 ./mvnw clean install
 # run local
 java -jar ./sparkstreaming-job/target/zipkin-sparkstreaming-job-*.jar \
+  --zipkin.storage.type=elasticsearch \
+  --zipkin.storage.elasticsearch.hosts=http://127.0.0.1:9200 \
   --zipkin.sparkstreaming.stream.kafka.bootstrap-servers=127.0.0.1:9092
 # run in a cluster
 java -jar ./sparkstreaming-job/target/zipkin-sparkstreaming-job-*.jar \
+  --zipkin.storage.type=elasticsearch \
+  --zipkin.storage.elasticsearch.hosts=http://127.0.0.1:9200 \
   --zipkin.sparkstreaming.stream.kafka.bootstrap-servers=127.0.0.1:9092 \
-  --zipkin.sparkstreaming.sparkMaster=spark://acole:7077
+  --zipkin.sparkstreaming.sparkMaster=spark://127.0.0.1:7077
 ```
 
 ## Key Components
@@ -59,4 +63,6 @@ same trace ID.
 This could be a Zipkin storage component, like Elasticsearch, or another
 sink, such as a streaming visualization tool.
 
-TODO: briefly describe and link to built-in consumers
+Consumer | Description
+--- | --- | ---
+[Storage](./consumer/storage) | Writes spans to a Zipkin Storage Component

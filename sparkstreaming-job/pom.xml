@@ -57,6 +57,11 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>zipkin-sparkstreaming-autoconfigure-consumer-storage</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>zipkin-sparkstreaming-autoconfigure-adjuster-finagle</artifactId>
     </dependency>
 
@@ -130,6 +135,12 @@
                 <!-- Prevent minification from excluding classes looked up by name -->
                 <filter>
                   <artifact>io.zipkin.sparkstreaming:*</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>org.mariadb.jdbc:mariadb-java-client</artifact>
                   <includes>
                     <include>**</include>
                   </includes>

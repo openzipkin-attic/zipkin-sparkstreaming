@@ -14,23 +14,20 @@
 package zipkin.sparkstreaming.job;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import zipkin.sparkstreaming.Consumer;
 import zipkin.sparkstreaming.SparkStreamingJob;
 import zipkin.sparkstreaming.autoconfigure.adjuster.finagle.ZipkinFinagleAdjusterAutoConfiguration;
+import zipkin.sparkstreaming.autoconfigure.consumer.storage.ZipkinStorageConsumerAutoConfiguration;
 import zipkin.sparkstreaming.autoconfigure.stream.kafka.ZipkinKafkaStreamFactoryAutoConfiguration;
 
 @SpringBootApplication
 @Import({
     ZipkinSparkStreamingConfiguration.class,
-    ZipkinSparkStreamingJob.TemporaryConfiguration.class,
     // These need to be explicity included as the shade plugin squashes spring.properties
     ZipkinKafkaStreamFactoryAutoConfiguration.class,
-    ZipkinFinagleAdjusterAutoConfiguration.class
+    ZipkinFinagleAdjusterAutoConfiguration.class,
+    ZipkinStorageConsumerAutoConfiguration.class
 })
 public class ZipkinSparkStreamingJob {
 
@@ -38,15 +35,5 @@ public class ZipkinSparkStreamingJob {
     new SpringApplicationBuilder(ZipkinSparkStreamingJob.class)
         .run(args)
         .getBean(SparkStreamingJob.class).awaitTermination();
-  }
-
-  // What's left is to make a storage consumer
-  @Configuration
-  static class TemporaryConfiguration {
-    @Bean @ConditionalOnMissingBean Consumer consumer() {
-      return spansSharingTraceId -> {
-        System.err.println(spansSharingTraceId);
-      };
-    }
   }
 }
