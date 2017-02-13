@@ -17,7 +17,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 // TODO: actually test the code
@@ -29,7 +28,7 @@ public class ZookeeperBootstrapServersTest {
   @Test
   public void buildZookeeperBootstrapServers() throws Exception {
     ZookeeperBootstrapServers servers = ZookeeperBootstrapServers.newBuilder()
-        .connectServers(asList("127.0.0.1:2181"))
+        .connect("127.0.0.1:2181")
         .build();
     assertThat(servers).isNotNull();
   }
@@ -37,7 +36,7 @@ public class ZookeeperBootstrapServersTest {
   @Test
   public void buildFailOnMissingProperties() throws Exception {
     thrown.expect(IllegalStateException.class);
-    thrown.expectMessage("Missing required properties: connectServers");
+    thrown.expectMessage("Missing required properties: connect");
     ZookeeperBootstrapServers servers = ZookeeperBootstrapServers.newBuilder().build();
   }
 }

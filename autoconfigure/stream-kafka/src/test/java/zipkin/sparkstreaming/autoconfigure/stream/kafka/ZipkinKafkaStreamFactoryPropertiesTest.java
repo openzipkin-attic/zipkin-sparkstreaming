@@ -47,9 +47,7 @@ public class ZipkinKafkaStreamFactoryPropertiesTest {
         parameters("topic", "zapkin", p -> p.getTopic()),
         parameters("group-id", "zapkin", p -> p.getGroupId()),
         parameters("bootstrap-servers", "127.0.0.1:9092", p -> p.getBootstrapServers().get(0)),
-        parameters("zookeeper.connect-servers", "127.0.0.1:3001",
-            p -> p.getZookeeper().getConnectServers().get(0)),
-        parameters("zookeeper.connect-suffix", "/prod", p -> p.getZookeeper().getConnectSuffix()),
+        parameters("zookeeper.connect", "127.0.0.1:3001", p -> p.getZookeeper().getConnect()),
         parameters("zookeeper.session-timeout", 9999, p -> p.getZookeeper().getSessionTimeout()),
     });
   }

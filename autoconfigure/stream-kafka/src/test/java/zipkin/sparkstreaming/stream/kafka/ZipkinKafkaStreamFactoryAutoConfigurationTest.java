@@ -72,7 +72,7 @@ public class ZipkinKafkaStreamFactoryAutoConfigurationTest {
   @Test
   public void providesCollectorComponent_whenKafkaZookeeperSet() {
     addEnvironment(context,
-        "zipkin.sparkstreaming.stream.kafka.zookeeper.connect-servers:" + KAFKA_ZOOKEEPER
+        "zipkin.sparkstreaming.stream.kafka.zookeeper.connect:" + KAFKA_ZOOKEEPER
     );
     context.register(
         PropertyPlaceholderAutoConfiguration.class,
@@ -82,7 +82,7 @@ public class ZipkinKafkaStreamFactoryAutoConfigurationTest {
 
     ZipkinKafkaStreamFactoryProperties props =
         context.getBean(ZipkinKafkaStreamFactoryProperties.class);
-    assertThat(props.getZookeeper().getConnectServers())
-        .containsExactly(KAFKA_ZOOKEEPER);
+    assertThat(props.getZookeeper().getConnect())
+        .isEqualTo(KAFKA_ZOOKEEPER);
   }
 }

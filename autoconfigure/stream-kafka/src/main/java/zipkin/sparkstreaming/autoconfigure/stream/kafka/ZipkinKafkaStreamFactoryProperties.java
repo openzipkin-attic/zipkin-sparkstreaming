@@ -60,26 +60,15 @@ public class ZipkinKafkaStreamFactoryProperties {
   }
 
   public static class Zookeeper {
-    private List<String> connectServers;
-    private String connectSuffix;
+    private String connect;
     private Integer sessionTimeout;
 
-    public List<String> getConnectServers() {
-      return connectServers;
+    public String getConnect() {
+      return connect;
     }
 
-    public void setConnectServers(List<String> connectServers) {
-      if (connectServers != null && !connectServers.isEmpty()) {
-        this.connectServers = connectServers;
-      }
-    }
-
-    public String getConnectSuffix() {
-      return connectSuffix;
-    }
-
-    public void setConnectSuffix(String connectSuffix) {
-      this.connectSuffix = emptyToNull(connectSuffix);
+    public void setConnect(String connect) {
+      this.connect = emptyToNull(connect);
     }
 
     public Integer getSessionTimeout() {
@@ -96,11 +85,11 @@ public class ZipkinKafkaStreamFactoryProperties {
     if (topic != null) result.topic(topic);
     if (groupId != null) result.groupId(groupId);
     if (bootstrapServers != null) result.bootstrapServers(bootstrapServers);
-    if (zookeeper.getConnectServers() == null) return result;
+
+    if (zookeeper.getConnect() == null) return result; // Zookeeper bootstrap is optional
 
     ZookeeperBootstrapServers.Builder supplier = ZookeeperBootstrapServers.newBuilder();
-    supplier.connectServers(zookeeper.getConnectServers());
-    if (zookeeper.connectSuffix != null) supplier.connectSuffix(zookeeper.connectSuffix);
+    supplier.connect(zookeeper.getConnect());
     if (zookeeper.sessionTimeout != null) supplier.sessionTimeout(zookeeper.sessionTimeout);
     result.bootstrapServers(supplier.build());
     return result;

@@ -34,7 +34,7 @@ public class ZipkinKafkaStreamFactoryAutoConfiguration {
 
   static final class KafkaServersSetCondition extends SpringBootCondition {
     static final String BOOTSTRAP = "zipkin.sparkstreaming.stream.kafka.bootstrap-servers";
-    static final String CONNECT = "zipkin.sparkstreaming.stream.kafka.zookeeper.connect-servers";
+    static final String CONNECT = "zipkin.sparkstreaming.stream.kafka.zookeeper.connect";
 
     @Override
     public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata a) {

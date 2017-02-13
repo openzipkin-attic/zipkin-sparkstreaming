@@ -18,7 +18,6 @@ import com.google.auto.value.AutoValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
@@ -31,7 +30,6 @@ public abstract class ZookeeperBootstrapServers implements BootstrapServers {
 
   public static Builder newBuilder() {
     return new AutoValue_ZookeeperBootstrapServers.Builder()
-        .connectSuffix("")
         .sessionTimeout(10000);
   }
 
@@ -39,15 +37,12 @@ public abstract class ZookeeperBootstrapServers implements BootstrapServers {
   public interface Builder {
 
     /**
-     * host:port pairs corresponding to a Zookeeper server. This forms the first part of the connect
-     * string. No default
+     * Zookeeper host string. host:port pairs corresponding to a Zookeeper server with an optional
+     * chroot suffix. No default
+     *
+     * @see ZooKeeper#ZooKeeper(String, int, Watcher)
      */
-    Builder connectServers(List<String> connectServers);
-
-    /**
-     * Optional chroot path used as a suffix for connect string. Defaults to empty.
-     */
-    Builder connectSuffix(String connectSuffix);
+    Builder connect(String connect);
 
     /**
      * Zookeeper session timeout in milliseconds. Defaults to 10000
@@ -57,17 +52,14 @@ public abstract class ZookeeperBootstrapServers implements BootstrapServers {
     ZookeeperBootstrapServers build();
   }
 
-  abstract List<String> connectServers();
-
-  abstract String connectSuffix();
+  abstract String connect();
 
   abstract int sessionTimeout();
 
   @Override public List<String> get() {
-    String connectString = StringUtils.join(connectServers(), ",") + connectSuffix();
     ZooKeeper zkClient = null;
     try {
-      zkClient = new ZooKeeper(connectString, sessionTimeout(), new NoOpWatcher());
+      zkClient = new ZooKeeper(connect(), sessionTimeout(), new NoOpWatcher());
       List<String> ids = zkClient.getChildren("/brokers/ids", false);
       ObjectMapper objectMapper = new ObjectMapper();
 
