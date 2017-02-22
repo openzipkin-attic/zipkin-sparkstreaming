@@ -59,7 +59,9 @@ Stream | Description
 An adjuster conditionally changes spans sharing the same trace ID.
 
 You can make adjusters to fixup data reported by instrumentation, or to
-scrub private data.
+scrub private data. This [example](https://github.com/openzipkin/zipkin-sparkstreaming-example) shows how to add a custom adjuster to the spark job.
+
+Below is the list of prepackaged adjusters.
 
 Adjuster | Description
 --- | --- | ---
