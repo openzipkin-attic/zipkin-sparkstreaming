@@ -33,6 +33,7 @@
   </properties>
 
   <modules>
+    <module>stream-http</module>
     <module>stream-kafka</module>
     <module>adjuster-finagle</module>
     <module>consumer-storage</module>

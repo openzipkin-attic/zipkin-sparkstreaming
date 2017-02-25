@@ -118,6 +118,18 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>zipkin-sparkstreaming-stream-http</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>zipkin-sparkstreaming-autoconfigure-stream-http</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>zipkin-sparkstreaming-stream-kafka</artifactId>
         <version>${project.version}</version>
       </dependency>
