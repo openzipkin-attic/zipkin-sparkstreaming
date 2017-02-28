@@ -37,14 +37,14 @@ import zipkin.storage.StorageComponent;
 public abstract class SparkStreamingJob implements Closeable {
 
   public static Builder newBuilder() {
-    Map<String, String> sparkProperties = new LinkedHashMap<>();
-    sparkProperties.put("spark.ui.enabled", "false");
+    Map<String, String> conf = new LinkedHashMap<>();
+    conf.put("spark.ui.enabled", "false");
     // avoids strange class not found bug on Logger.setLevel
-    sparkProperties.put("spark.akka.logLifecycleEvents", "true");
+    conf.put("spark.akka.logLifecycleEvents", "true");
     return new AutoValue_SparkStreamingJob.Builder()
-        .sparkMaster("local[*]")
-        .sparkJars(Collections.emptyList())
-        .sparkProperties(sparkProperties)
+        .master("local[*]")
+        .jars(Collections.emptyList())
+        .conf(conf)
         .adjusters(Collections.emptyList())
         .batchDuration(10_000);
   }
@@ -56,13 +56,13 @@ public abstract class SparkStreamingJob implements Closeable {
      *
      * <p>local[*] master lets us run & test the job locally without setting a Spark cluster
      */
-    Builder sparkMaster(String sparkMaster);
+    Builder master(String master);
 
-    /** When set, this indicates which sparkJars to distribute to the cluster. */
-    Builder sparkJars(List<String> sparkJars);
+    /** When set, this indicates which jars to distribute to the cluster. */
+    Builder jars(List<String> jars);
 
     /** Overrides the properties used to create a {@link SparkConf}. */
-    Builder sparkProperties(Map<String, String> sparkProperties);
+    Builder conf(Map<String, String> conf);
 
     /** The time interval at which streaming data will be divided into batches. Defaults to 10s. */
     Builder batchDuration(long batchDurationMillis);
@@ -79,11 +79,11 @@ public abstract class SparkStreamingJob implements Closeable {
     SparkStreamingJob build();
   }
 
-  abstract String sparkMaster();
+  abstract String master();
 
-  abstract List<String> sparkJars();
+  abstract List<String> jars();
 
-  abstract Map<String, String> sparkProperties();
+  abstract Map<String, String> conf();
 
   abstract long batchDuration();
 
@@ -98,10 +98,10 @@ public abstract class SparkStreamingJob implements Closeable {
   @Memoized
   JavaStreamingContext jsc() {
     SparkConf conf = new SparkConf(true)
-        .setMaster(sparkMaster())
+        .setMaster(master())
         .setAppName(getClass().getName());
-    if (!sparkJars().isEmpty()) conf.setJars(sparkJars().toArray(new String[0]));
-    for (Map.Entry<String, String> entry : sparkProperties().entrySet()) {
+    if (!jars().isEmpty()) conf.setJars(jars().toArray(new String[0]));
+    for (Map.Entry<String, String> entry : conf().entrySet()) {
       conf.set(entry.getKey(), entry.getValue());
     }
     return new JavaStreamingContext(conf, new Duration(batchDuration()));

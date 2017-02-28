@@ -31,6 +31,8 @@ import zipkin.TestObjects;
 import zipkin.sparkstreaming.job.ZipkinSparkStreamingConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
+import static org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment;
 
 public class ZipkinSparkStreamingJobAutoConfigurationTest {
   @Rule
@@ -104,5 +106,92 @@ public class ZipkinSparkStreamingJobAutoConfigurationTest {
     assertThat(job).isNotNull();
     assertThat(job.adjusters())
         .contains(AdjusterConfiguration.one, AdjusterConfiguration.two);
+  }
+
+  @Test
+  public void defaultConf() {
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        DummyConfiguration.class,
+        AdjusterConfiguration.class,
+        ZipkinSparkStreamingConfiguration.class);
+    context.refresh();
+
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job.conf()).containsExactly(
+        entry("spark.ui.enabled", "false"),
+        entry("spark.akka.logLifecycleEvents", "true")
+    );
+  }
+
+  @Test
+  public void canOverrideConf() {
+    addEnvironment(context,
+        "zipkin.sparkstreaming.conf.spark.ui.enabled:" + true);
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        DummyConfiguration.class,
+        AdjusterConfiguration.class,
+        ZipkinSparkStreamingConfiguration.class);
+    context.refresh();
+
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job.conf()).containsEntry(
+        "spark.ui.enabled", "true"
+    );
+  }
+
+  /** Default is empty, which implies we lookup the current classpath. */
+  @Test
+  public void defaultJars() {
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        DummyConfiguration.class,
+        AdjusterConfiguration.class,
+        ZipkinSparkStreamingConfiguration.class);
+    context.refresh();
+
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job.jars()).isEmpty();
+  }
+
+  @Test
+  public void canOverrideJars() {
+    addEnvironment(context,
+        "zipkin.sparkstreaming.jars:foo.jar,bar.jar");
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        DummyConfiguration.class,
+        AdjusterConfiguration.class,
+        ZipkinSparkStreamingConfiguration.class);
+    context.refresh();
+
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job.jars()).containsExactly(
+        "foo.jar", "bar.jar"
+    );
+  }
+
+  /** Default is empty, which implies we lookup the current classpath. */
+  @Test
+  public void defaultBatchDuration() {
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        DummyConfiguration.class,
+        AdjusterConfiguration.class,
+        ZipkinSparkStreamingConfiguration.class);
+    context.refresh();
+
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job.batchDuration()).isEqualTo(10_000);
+  }
+
+  @Test
+  public void canOverrideBatchDuration() {
+    addEnvironment(context,
+        "zipkin.sparkstreaming.batch-duration:1000");
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        DummyConfiguration.class,
+        AdjusterConfiguration.class,
+        ZipkinSparkStreamingConfiguration.class);
+    context.refresh();
+
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job.batchDuration()).isEqualTo(1_000);
   }
 }

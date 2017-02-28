@@ -41,7 +41,7 @@ java -jar zipkin-sparkstreaming-job.jar \
   --zipkin.storage.type=elasticsearch \
   --zipkin.storage.elasticsearch.hosts=http://127.0.0.1:9200 \
   --zipkin.sparkstreaming.stream.kafka.bootstrap-servers=127.0.0.1:9092 \
-  --zipkin.sparkstreaming.sparkMaster=spark://127.0.0.1:7077
+  --zipkin.sparkstreaming.master=spark://127.0.0.1:7077
 ```
 
 ## Key Components

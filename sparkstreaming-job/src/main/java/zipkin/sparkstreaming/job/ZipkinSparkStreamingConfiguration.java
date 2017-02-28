@@ -46,11 +46,11 @@ public class ZipkinSparkStreamingConfiguration {
       Consumer consumer
   ) {
     SparkStreamingJob.Builder builder = sparkStreaming.toBuilder();
-    if (sparkStreaming.getSparkMaster() != null && sparkStreaming.getSparkJars() == null) {
+    if (sparkStreaming.getMaster() != null && sparkStreaming.getJars() == null) {
       List<String> pathToJars = pathToJars(ZipkinSparkStreamingJob.class, adjusters);
       if (pathToJars != null) {
         log.info("Will distribute the following jars to the cluster: " + pathToJars);
-        builder.sparkJars(pathToJars);
+        builder.jars(pathToJars);
       }
     }
     return builder.streamFactory(streamFactory)
