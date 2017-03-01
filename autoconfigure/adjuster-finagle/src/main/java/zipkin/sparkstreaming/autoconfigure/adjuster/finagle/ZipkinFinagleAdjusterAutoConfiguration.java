@@ -18,6 +18,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import zipkin.sparkstreaming.Adjuster;
+import zipkin.sparkstreaming.adjuster.finagle.FinagleIssue343Adjuster;
 
 @Configuration
 @EnableConfigurationProperties(ZipkinFinagleAdjusterProperties.class)
@@ -31,5 +32,15 @@ public class ZipkinFinagleAdjusterAutoConfiguration {
   Adjuster finagleAdjuster(ZipkinFinagleAdjusterProperties properties) {
     return properties.toBuilder().build();
   }
+
+  @Bean
+  @ConditionalOnProperty(
+      value = "zipkin.sparkstreaming.adjuster.finagle.adjust-issue343",
+      havingValue = "true"
+  )
+  Adjuster finagleIssue343Adjuster() {
+    return FinagleIssue343Adjuster.create();
+  }
+
 }
 

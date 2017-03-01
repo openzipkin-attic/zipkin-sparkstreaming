@@ -34,3 +34,4 @@ have a prefix of "zipkin.sparkstreaming.adjuster.finagle"
 Property | Default | Description | Fix
 --- | --- | --- | ---
 apply-timestamp-and-duration | true | Backfill span.timestamp and duration based on annotations. | [Use zipkin-finagle](https://github.com/openzipkin/zipkin-finagle/issues/10)
+adjust-issue343 | false | Drops "finagle.flush" annotation, to rectify [finagle memcached bug](https://github.com/twitter/finagle/issues/343). | Use finagle version 6.36.0 or higher

@@ -72,4 +72,39 @@ public class ZipkinFinagleAdjusterAutoConfigurationTest {
     FinagleAdjuster adjuster = context.getBean(FinagleAdjuster.class);
     assertThat(adjuster.applyTimestampAndDuration()).isFalse();
   }
+
+  @Test
+  public void doesntProvideIssue343AdjusterWhenFinagleDisabled() {
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        ZipkinFinagleAdjusterAutoConfiguration.class);
+    context.refresh();
+
+    thrown.expect(NoSuchBeanDefinitionException.class);
+    context.getBean(FinagleIssue343Adjuster.class);
+  }
+
+  @Test
+  public void doesntProvidesIssue343AdjusterWhenFinagleEnabledAndIssue343Disabled() {
+    addEnvironment(context,
+        "zipkin.sparkstreaming.adjuster.finagle.enabled:" + true);
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        ZipkinFinagleAdjusterAutoConfiguration.class);
+    context.refresh();
+
+    thrown.expect(NoSuchBeanDefinitionException.class);
+    context.getBean(FinagleIssue343Adjuster.class);
+  }
+
+  @Test
+  public void providesIssue343Adjuster() {
+    addEnvironment(context,
+        "zipkin.sparkstreaming.adjuster.finagle.enabled:" + true,
+        "zipkin.sparkstreaming.adjuster.finagle.adjust-issue343:" + true);
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        ZipkinFinagleAdjusterAutoConfiguration.class);
+    context.refresh();
+
+    FinagleIssue343Adjuster adjuster = context.getBean(FinagleIssue343Adjuster.class);
+    assertThat(adjuster).isNotNull();
+  }
 }
