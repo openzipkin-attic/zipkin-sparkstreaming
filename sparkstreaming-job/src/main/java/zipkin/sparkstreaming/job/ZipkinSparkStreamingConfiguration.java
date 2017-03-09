@@ -24,6 +24,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,10 +43,12 @@ public class ZipkinSparkStreamingConfiguration {
 
   @Bean SparkStreamingJob sparkStreaming(
       ZipkinSparkStreamingProperties sparkStreaming,
+      @Value("${zipkin.log-level:info}") String zipkinLogLevel,
       StreamFactory streamFactory,
       Consumer consumer
   ) {
     SparkStreamingJob.Builder builder = sparkStreaming.toBuilder();
+    if (!"".equals(zipkinLogLevel)) builder.zipkinLogLevel(zipkinLogLevel);
     if (sparkStreaming.getMaster() != null && sparkStreaming.getJars() == null) {
       List<String> pathToJars = pathToJars(ZipkinSparkStreamingJob.class, adjusters);
       if (pathToJars != null) {

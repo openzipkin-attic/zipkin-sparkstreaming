@@ -18,11 +18,14 @@ import com.google.auto.value.extension.memoized.Memoized;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
@@ -39,14 +42,13 @@ public abstract class SparkStreamingJob implements Closeable {
   public static Builder newBuilder() {
     Map<String, String> conf = new LinkedHashMap<>();
     conf.put("spark.ui.enabled", "false");
-    // avoids strange class not found bug on Logger.setLevel
-    conf.put("spark.akka.logLifecycleEvents", "true");
     return new AutoValue_SparkStreamingJob.Builder()
         .master("local[*]")
         .jars(Collections.emptyList())
         .conf(conf)
         .adjusters(Collections.emptyList())
-        .batchDuration(10_000);
+        .batchDuration(10_000)
+        .zipkinLogLevel("INFO");
   }
 
   @AutoValue.Builder
@@ -76,6 +78,9 @@ public abstract class SparkStreamingJob implements Closeable {
     /** Accepts spans grouped by trace ID. For example, writing to a {@link StorageComponent} */
     Builder consumer(Consumer consumer);
 
+    /** Log4J level used for the "zipkin" category. Important when running in a cluster. */
+    Builder zipkinLogLevel(String zipkinLogLevel);
+
     SparkStreamingJob build();
   }
 
@@ -92,6 +97,8 @@ public abstract class SparkStreamingJob implements Closeable {
   abstract List<Adjuster> adjusters();
 
   abstract Consumer consumer();
+
+  abstract String zipkinLogLevel();
 
   final AtomicBoolean started = new AtomicBoolean(false);
 
@@ -111,10 +118,12 @@ public abstract class SparkStreamingJob implements Closeable {
   public SparkStreamingJob start() {
     if (!started.compareAndSet(false, true)) return this;
 
+    Runnable logInitializer = LogInitializer.create(zipkinLogLevel());
+    logInitializer.run(); // Ensures local log commands emit
     streamSpansToStorage(
         streamFactory().create(jsc()),
-        adjusters(),
-        consumer()
+        new AutoValue_ReadSpans(logInitializer),
+        new AutoValue_AdjustAndConsumeSpansSharingTraceId(logInitializer, adjusters(), consumer())
     );
 
     jsc().start();
@@ -130,18 +139,10 @@ public abstract class SparkStreamingJob implements Closeable {
   // Otherwise, tasks cannot be distributed across the cluster.
   static void streamSpansToStorage(
       JavaDStream<byte[]> stream,
-      List<Adjuster> adjusters,
-      Consumer consumer
+      ReadSpans readSpans,
+      AdjustAndConsumeSpansSharingTraceId adjustAndConsumeSpansSharingTraceId
   ) {
-    JavaDStream<Span> spans = stream
-        .filter(bytes -> bytes.length > 0)
-        .flatMap(bytes -> {
-          try {
-            return readSpans(bytes);
-          } catch (RuntimeException e) {
-            return Collections.<Span>emptyList();
-          }
-        });
+    JavaDStream<Span> spans = stream.flatMap(readSpans);
 
     // TODO: plug in some filter to drop spans regardless of trace ID
     // spans = spans.filter(spanFilter);
@@ -151,37 +152,8 @@ public abstract class SparkStreamingJob implements Closeable {
         .groupByKey();
 
     tracesById.foreachRDD(rdd -> {
-      rdd.values().foreachPartition(p -> {
-        while (p.hasNext()) {
-          Iterable<Span> spansSharingTraceId = p.next();
-          for (Adjuster adjuster : adjusters) {
-            spansSharingTraceId = adjuster.adjust(spansSharingTraceId);
-          }
-          consumer.accept(spansSharingTraceId);
-        }
-      });
+      rdd.values().foreachPartition(adjustAndConsumeSpansSharingTraceId);
     });
-  }
-
-  // In TBinaryProtocol encoding, the first byte is the TType, in a range 0-16
-  // .. If the first byte isn't in that range, it isn't a thrift.
-  //
-  // When byte(0) == '[' (91), assume it is a list of json-encoded spans
-  //
-  // When byte(0) <= 16, assume it is a TBinaryProtocol-encoded thrift
-  // .. When serializing a Span (Struct), the first byte will be the type of a field
-  // .. When serializing a List[ThriftSpan], the first byte is the member type, TType.STRUCT(12)
-  // .. As ThriftSpan has no STRUCT fields: so, if the first byte is TType.STRUCT(12), it is a list.
-  static List<Span> readSpans(byte[] bytes) {
-    if (bytes[0] == '[') {
-      return Codec.JSON.readSpans(bytes);
-    } else {
-      if (bytes[0] == 12 /* TType.STRUCT */) {
-        return Codec.THRIFT.readSpans(bytes);
-      } else { // historical kafka encoding of single thrift span per message
-        return Collections.singletonList(Codec.THRIFT.readSpan(bytes));
-      }
-    }
   }
 
   @Override public void close() throws IOException {

@@ -42,5 +42,11 @@
       <version>2.7.3</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.portingle</groupId>
+      <artifactId>slf4jtesting</artifactId>
+      <version>1.0.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

@@ -21,20 +21,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import slf4jtest.LogLevel;
+import slf4jtest.TestLogger;
+import slf4jtest.TestLoggerFactory;
 import zipkin.TestObjects;
-import zipkin.sparkstreaming.consumer.storage.TestLogger.LogMessage;
 import zipkin.storage.AsyncSpanConsumer;
 import zipkin.storage.Callback;
 import zipkin.storage.InMemoryStorage;
 import zipkin.storage.StorageComponent;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -45,7 +48,7 @@ public class StorageConsumerTest {
   @Rule public ExpectedException thrown = ExpectedException.none();
 
   StorageComponent storage = mock(StorageComponent.class);
-  TestLogger logger = new TestLogger();
+  TestLogger logger = new TestLoggerFactory().getLogger("");
   StorageConsumer storageConsumer = new StorageConsumer() {
     @Override Logger log() {
       return logger;
@@ -59,8 +62,9 @@ public class StorageConsumerTest {
   @Test
   public void logsWhenEmpty() {
     storageConsumer.accept(Collections.emptyList());
-    assertThat(logger.messages)
-        .containsExactly(LogMessage.create(Level.FINE, "Input was empty", null));
+    assertThat(logger.lines())
+        .extracting("level", "text")
+        .containsExactly(tuple(LogLevel.DebugLevel, "Input was empty"));
   }
 
   @Test
@@ -77,8 +81,9 @@ public class StorageConsumerTest {
     };
 
     storageConsumer.accept(TestObjects.TRACE);
-    assertThat(logger.messages)
-        .containsExactly(LogMessage.create(Level.INFO, "Wrote 3 spans", null));
+    assertThat(logger.lines())
+        .extracting("level", "text")
+        .containsExactly(tuple(LogLevel.DebugLevel, "Wrote 3 spans"));
 
     assertThat(storage.spanStore().getRawTrace(
         TestObjects.TRACE.get(0).traceIdHigh,
@@ -98,9 +103,10 @@ public class StorageConsumerTest {
 
     storageConsumer.accept(TestObjects.TRACE);
 
-    assertThat(logger.messages).containsExactly(
-        LogMessage.create(Level.WARNING, "Dropped 3 spans: failed", acceptException)
-    );
+    assertThat(logger.lines())
+        .extracting("level", "text")
+        .containsExactly(tuple(LogLevel.WarnLevel, "Dropped 3 spans: failed"));
+    // TODO: test for acceptException
   }
 
   @Test
@@ -114,9 +120,10 @@ public class StorageConsumerTest {
 
     storageConsumer.accept(TestObjects.TRACE);
 
-    assertThat(logger.messages).containsExactly(
-        LogMessage.create(Level.WARNING, "Dropped 3 spans: failed", callbackException)
-    );
+    assertThat(logger.lines())
+        .extracting("level", "text")
+        .containsExactly(tuple(LogLevel.WarnLevel, "Dropped 3 spans: failed"));
+    // TODO: test for callbackException
   }
 
   @Test
@@ -130,9 +137,10 @@ public class StorageConsumerTest {
 
     storageConsumer.accept(TestObjects.TRACE);
 
-    assertThat(logger.messages).containsExactly(
-        LogMessage.create(Level.WARNING, "Dropped 3 spans: failed", callbackException)
-    );
+    assertThat(logger.lines())
+        .extracting("level", "text")
+        .containsExactly(tuple(LogLevel.WarnLevel, "Dropped 3 spans: failed"));
+    // TODO: test for callbackException
   }
 
   @Test(timeout = 1000L)

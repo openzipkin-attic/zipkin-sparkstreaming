@@ -33,17 +33,18 @@ You can either run the job in local or cluster mode. Here's an example of each:
 ```bash
 # run local
 java -jar zipkin-sparkstreaming-job.jar \
+  --zipkin.log-level=debug \
   --zipkin.storage.type=elasticsearch \
   --zipkin.storage.elasticsearch.hosts=http://127.0.0.1:9200 \
   --zipkin.sparkstreaming.stream.kafka.bootstrap-servers=127.0.0.1:9092
 # run in a cluster
 java -jar zipkin-sparkstreaming-job.jar \
+  --zipkin.log-level=debug \
   --zipkin.storage.type=elasticsearch \
   --zipkin.storage.elasticsearch.hosts=http://127.0.0.1:9200 \
   --zipkin.sparkstreaming.stream.kafka.bootstrap-servers=127.0.0.1:9092 \
   --zipkin.sparkstreaming.master=spark://127.0.0.1:7077
 ```
-
 
 ## Key Components
 

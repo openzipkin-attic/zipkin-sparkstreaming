@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 /** Retrieves the Kafka Bootstrap Servers from ZooKeeper. */
 @AutoValue
 public abstract class ZookeeperBootstrapServers implements BootstrapServers {
+  private static final Logger log = LoggerFactory.getLogger(ZookeeperBootstrapServers.class);
 
   public static Builder newBuilder() {
     return new AutoValue_ZookeeperBootstrapServers.Builder()
@@ -99,12 +100,9 @@ public abstract class ZookeeperBootstrapServers implements BootstrapServers {
   }
 
   static final class NoOpWatcher implements Watcher {
-
-    private Logger logger = LoggerFactory.getLogger(NoOpWatcher.class);
-
     @Override
     public void process(WatchedEvent event) {
-      logger.debug(event.toString());
+      log.debug("{}", event);
     }
   }
 

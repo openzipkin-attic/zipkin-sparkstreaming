@@ -118,8 +118,7 @@ public class ZipkinSparkStreamingJobAutoConfigurationTest {
 
     job = context.getBean(SparkStreamingJob.class);
     assertThat(job.conf()).containsExactly(
-        entry("spark.ui.enabled", "false"),
-        entry("spark.akka.logLifecycleEvents", "true")
+        entry("spark.ui.enabled", "false")
     );
   }
 
@@ -137,6 +136,19 @@ public class ZipkinSparkStreamingJobAutoConfigurationTest {
     assertThat(job.conf()).containsEntry(
         "spark.ui.enabled", "true"
     );
+  }
+
+  @Test
+  public void canOverrideLogLevel() {
+    addEnvironment(context, "zipkin.log-level:debug");
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        DummyConfiguration.class,
+        AdjusterConfiguration.class,
+        ZipkinSparkStreamingConfiguration.class);
+    context.refresh();
+
+    job = context.getBean(SparkStreamingJob.class);
+    assertThat(job.zipkinLogLevel()).isEqualTo("debug");
   }
 
   /** Default is empty, which implies we lookup the current classpath. */

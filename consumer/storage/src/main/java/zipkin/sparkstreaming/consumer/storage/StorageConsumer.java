@@ -16,8 +16,8 @@ package zipkin.sparkstreaming.consumer.storage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import zipkin.Component;
 import zipkin.Span;
 import zipkin.internal.CallbackCaptor;
@@ -26,20 +26,21 @@ import zipkin.storage.StorageComponent;
 
 /** A storage consumer which writes to storage on {@link #accept(Iterable)}. */
 public abstract class StorageConsumer implements Consumer, Component {
-  static final Logger log = Logger.getLogger(StorageConsumer.class.getName());
-  transient volatile StorageComponent instance; // not serializable
-
-  /** Subclasses should initialize this from serializable state. */
-  protected abstract StorageComponent tryCompute();
+  private static final Logger log = LoggerFactory.getLogger(StorageConsumer.class);
 
   Logger log() { // Override for testing. Instance variables won't work as Logger isn't serializable
     return log;
   }
 
+  transient volatile StorageComponent instance; // not serializable
+
+  /** Subclasses should initialize this from serializable state. */
+  protected abstract StorageComponent tryCompute();
+
   @Override public final void accept(Iterable<Span> spansSharingId) {
     List<Span> list = asList(spansSharingId);
     if (list.isEmpty()) {
-      log().fine("Input was empty");
+      log().debug("Input was empty");
       return;
     }
 
@@ -48,7 +49,7 @@ public abstract class StorageConsumer implements Consumer, Component {
     try {
       get().asyncSpanConsumer().accept(list, blockingCallback);
       blockingCallback.get();
-      log().info("Wrote " + list.size() + " spans");
+      log().debug("Wrote {} spans", list.size());
     } catch (RuntimeException e) {
       Throwable toLog = e.getClass().equals(RuntimeException.class) && e.getCause() != null
           ? e.getCause() // callback captor wraps checked exceptions
@@ -56,10 +57,10 @@ public abstract class StorageConsumer implements Consumer, Component {
       String message = "Dropped " + list.size() + " spans: " + toLog.getMessage();
 
       // TODO: We are dropping vs diverting to a dead letter queue or otherwise. Do we want this?
-      if (log().isLoggable(Level.WARNING)) {
-        log().log(Level.WARNING, message, toLog);
+      if (log().isWarnEnabled()) {
+        log().warn(message, toLog);
       } else {
-        log().warning(message);
+        log().warn(message);
       }
     }
   }

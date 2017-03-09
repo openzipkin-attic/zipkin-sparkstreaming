@@ -71,18 +71,13 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
-      <!-- when using shade, spring-boot-starter-logging doesn't work. use logback directly -->
+      <!-- when using shade, spring-boot-starter-logging doesn't work. use log4j directly -->
       <exclusions>
         <exclusion>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-logging</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
     </dependency>
 
     <dependency>
@@ -179,12 +174,6 @@
                 </filter>
                 <filter>
                   <artifact>org.slf4j:*</artifact>
-                  <includes>
-                    <include>**</include>
-                  </includes>
-                </filter>
-                <filter>
-                  <artifact>ch.qos.logback:logback-classic</artifact>
                   <includes>
                     <include>**</include>
                   </includes>

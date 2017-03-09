@@ -22,14 +22,15 @@ java -jar zipkin-sparkstreaming-job.jar \
 Configuration properties can be set via commandline parameters, system
 properties or any other alternative [supported by Spring Boot](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html).
 
-Here are the relevant setting and a short description. Properties all
-have a prefix of "zipkin.sparkstreaming"
+Here are the relevant setting and a short description. With the exception
+of "zipkin.log-level", properties all have a prefix of "zipkin.sparkstreaming"
 
 Property | Default | Description
 --- | --- | ---
+zipkin.log-level | info | Logging level for the category "zipkin". Set to debug for details.
 master | `local[*]` | The spark master used for this job. `local[*]` means run on-demand w/o connecting to a cluster.
 jars | the exec jar | Indicates which jars to distribute to the cluster.
-conf | "spark.ui.enabled=false", "spark.akka.logLifecycleEvents=true" | Overrides the properties used to create a SparkConf
+conf | "spark.ui.enabled=false" | Overrides the properties used to create a SparkConf
 batch-duration | 10000 | The time interval in millis at which streaming data will be divided into batches
 
 Ex. to manually control spark conf, add properties prefixed with `zipkin.sparkstreaming.conf`:
