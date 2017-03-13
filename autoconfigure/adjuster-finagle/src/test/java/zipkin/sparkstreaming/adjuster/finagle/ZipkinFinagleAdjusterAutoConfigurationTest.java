@@ -58,6 +58,7 @@ public class ZipkinFinagleAdjusterAutoConfigurationTest {
 
     FinagleAdjuster adjuster = context.getBean(FinagleAdjuster.class);
     assertThat(adjuster.applyTimestampAndDuration()).isTrue();
+    assertThat(adjuster.alwaysApplyTimestampAndDuration()).isFalse();
   }
 
   @Test
@@ -71,6 +72,19 @@ public class ZipkinFinagleAdjusterAutoConfigurationTest {
 
     FinagleAdjuster adjuster = context.getBean(FinagleAdjuster.class);
     assertThat(adjuster.applyTimestampAndDuration()).isFalse();
+  }
+
+  @Test
+  public void enableAlwaysApplyTimestampAndDuration() {
+    addEnvironment(context,
+        "zipkin.sparkstreaming.adjuster.finagle.enabled:" + true,
+        "zipkin.sparkstreaming.adjuster.finagle.always-apply-timestamp-and-duration:" + true);
+    context.register(PropertyPlaceholderAutoConfiguration.class,
+        ZipkinFinagleAdjusterAutoConfiguration.class);
+    context.refresh();
+
+    FinagleAdjuster adjuster = context.getBean(FinagleAdjuster.class);
+    assertThat(adjuster.alwaysApplyTimestampAndDuration()).isTrue();
   }
 
   @Test

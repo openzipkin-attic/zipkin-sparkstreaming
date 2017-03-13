@@ -34,35 +34,59 @@ public class FinagleAdjusterTest {
   // finagle often sets to the client endpoint to the same as the local endpoint
   Endpoint remoteEndpoint = localEndpoint.toBuilder().port(63840).build();
 
-  Span serverSpan = Span.builder()
+  Span serverSpanWithoutFinagleAnnotation = Span.builder()
       .traceId(-6054243957716233329L)
       .name("my-span")
       .id(-3615651937927048332L)
       .parentId(-6054243957716233329L)
       .addAnnotation(Annotation.create(1442493420635000L, Constants.SERVER_RECV, localEndpoint))
       .addAnnotation(Annotation.create(1442493422680000L, Constants.SERVER_SEND, localEndpoint))
-      .addBinaryAnnotation(BinaryAnnotation.create("srv/finagle.version", "6.28.0", localEndpoint0))
       .addBinaryAnnotation(BinaryAnnotation.address(Constants.SERVER_ADDR, localEndpoint))
       .addBinaryAnnotation(BinaryAnnotation.address(Constants.CLIENT_ADDR, remoteEndpoint))
+      .build();
+
+  Span serverSpanWithFinagleAnnotation = serverSpanWithoutFinagleAnnotation.toBuilder()
+      .addBinaryAnnotation(BinaryAnnotation.create("srv/finagle.version", "6.28.0", localEndpoint0))
       .build();
 
   /** Default is to apply timestamp and duration */
   @Test
   public void adjustsFinagleSpans() throws Exception {
-    Iterable<Span> adjusted = adjuster.adjust(asList(serverSpan));
-    assertThat(adjusted).containsExactly(ApplyTimestampAndDuration.apply(serverSpan));
+    Iterable<Span> adjusted = adjuster.adjust(asList(serverSpanWithFinagleAnnotation));
+    assertThat(adjusted)
+        .containsExactly(ApplyTimestampAndDuration.apply(serverSpanWithFinagleAnnotation));
   }
 
   @Test
   public void applyTimestampAndDuration_disabled() throws Exception {
     adjuster = FinagleAdjuster.newBuilder().applyTimestampAndDuration(false).build();
-    Iterable<Span> adjusted = adjuster.adjust(asList(serverSpan));
-    assertThat(adjusted).containsExactly(serverSpan);
+    Iterable<Span> adjusted = adjuster.adjust(asList(serverSpanWithFinagleAnnotation));
+    assertThat(adjusted).containsExactly(serverSpanWithFinagleAnnotation);
   }
 
   @Test
   public void doesntAdjustNonFinagleSpans() throws Exception {
     Iterable<Span> adjusted = adjuster.adjust(TestObjects.TRACE);
     assertThat(adjusted).containsExactlyElementsOf(TestObjects.TRACE);
+  }
+
+  @Test
+  public void adjustsFinagleSpansWithoutFinagleAnnotation() throws Exception {
+    adjuster = FinagleAdjuster.newBuilder().applyTimestampAndDuration(false)
+        .alwaysApplyTimestampAndDuration(true)
+        .build();
+    Iterable<Span> adjusted = adjuster.adjust(asList(serverSpanWithoutFinagleAnnotation));
+    assertThat(adjusted)
+        .containsExactly(ApplyTimestampAndDuration.apply(serverSpanWithoutFinagleAnnotation));
+  }
+
+  @Test
+  public void allPropertiesDisabled() throws Exception {
+    adjuster = FinagleAdjuster.newBuilder()
+        .applyTimestampAndDuration(false)
+        .alwaysApplyTimestampAndDuration(false)
+        .build();
+    Iterable<Span> adjusted = adjuster.adjust(asList(serverSpanWithFinagleAnnotation));
+    assertThat(adjusted).containsExactly(serverSpanWithFinagleAnnotation);
   }
 }
