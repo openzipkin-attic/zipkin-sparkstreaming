@@ -73,7 +73,7 @@ public class FinagleAdjusterTest {
   @Test
   public void adjustsFinagleSpansWithoutFinagleAnnotation() throws Exception {
     adjuster = FinagleAdjuster.newBuilder().applyTimestampAndDuration(false)
-        .alwaysApplyTimestampAndDuration(true)
+        .spanModelTimestampAndDuration(true)
         .build();
     Iterable<Span> adjusted = adjuster.adjust(asList(serverSpanWithoutFinagleAnnotation));
     assertThat(adjusted)
@@ -84,7 +84,7 @@ public class FinagleAdjusterTest {
   public void allPropertiesDisabled() throws Exception {
     adjuster = FinagleAdjuster.newBuilder()
         .applyTimestampAndDuration(false)
-        .alwaysApplyTimestampAndDuration(false)
+        .spanModelTimestampAndDuration(false)
         .build();
     Iterable<Span> adjusted = adjuster.adjust(asList(serverSpanWithFinagleAnnotation));
     assertThat(adjusted).containsExactly(serverSpanWithFinagleAnnotation);

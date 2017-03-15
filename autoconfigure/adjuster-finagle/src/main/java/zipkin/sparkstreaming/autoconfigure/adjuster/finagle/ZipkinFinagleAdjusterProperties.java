@@ -19,7 +19,7 @@ import zipkin.sparkstreaming.adjuster.finagle.FinagleAdjuster;
 @ConfigurationProperties("zipkin.sparkstreaming.adjuster.finagle")
 public class ZipkinFinagleAdjusterProperties {
   private boolean applyTimestampAndDuration = true;
-  private boolean alwaysApplyTimestampAndDuration = false;
+  private boolean spanModelTimestampAndDuration = false;
 
   public boolean isApplyTimestampAndDuration() {
     return applyTimestampAndDuration;
@@ -29,17 +29,17 @@ public class ZipkinFinagleAdjusterProperties {
     this.applyTimestampAndDuration = applyTimestampAndDuration;
   }
 
-  public boolean isAlwaysApplyTimestampAndDuration() {
-    return alwaysApplyTimestampAndDuration;
+  public boolean isSpanModelTimestampAndDuration() {
+    return spanModelTimestampAndDuration;
   }
 
-  public void setAlwaysApplyTimestampAndDuration(boolean alwaysApplyTimestampAndDuration) {
-    this.alwaysApplyTimestampAndDuration = alwaysApplyTimestampAndDuration;
+  public void setSpanModelTimestampAndDuration(boolean spanModelTimestampAndDuration) {
+    this.spanModelTimestampAndDuration = spanModelTimestampAndDuration;
   }
 
   FinagleAdjuster.Builder toBuilder() {
     return FinagleAdjuster.newBuilder()
         .applyTimestampAndDuration(applyTimestampAndDuration)
-        .alwaysApplyTimestampAndDuration(alwaysApplyTimestampAndDuration);
+        .spanModelTimestampAndDuration(spanModelTimestampAndDuration);
   }
 }
