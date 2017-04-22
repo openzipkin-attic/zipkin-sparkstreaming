@@ -18,7 +18,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import zipkin.sparkstreaming.consumer.storage.StorageConsumer;
@@ -65,22 +64,7 @@ public class ZipkinStorageConsumerAutoConfigurationTest {
   }
 
   @Test
-  public void providesStorageComponent_whenStorageTypeElasticsearchAndHostsAreUrls() {
-    addEnvironment(context,
-        "zipkin.sparkstreaming.consumer.storage.fail-fast:false",
-        "zipkin.storage.type:elasticsearch",
-        "zipkin.storage.elasticsearch.hosts:http://host1:9200"
-    );
-    context.register(PropertyPlaceholderAutoConfiguration.class,
-        ZipkinStorageConsumerAutoConfiguration.class);
-    context.refresh();
-
-    assertThat(storage()).isInstanceOf(
-        ZipkinStorageConsumerAutoConfiguration.ElasticsearchStorageConsumer.class);
-  }
-
-  @Test
-  public void doesntProvideStorageComponent_whenStorageTypeElasticsearchAndHostsNotUrls() {
+  public void providesStorageComponent_whenStorageTypeElasticsearch() {
     addEnvironment(context,
         "zipkin.sparkstreaming.consumer.storage.fail-fast:false",
         "zipkin.storage.type:elasticsearch"
@@ -89,8 +73,8 @@ public class ZipkinStorageConsumerAutoConfigurationTest {
         ZipkinStorageConsumerAutoConfiguration.class);
     context.refresh();
 
-    thrown.expect(NoSuchBeanDefinitionException.class);
-    storage();
+    assertThat(storage()).isInstanceOf(
+        ZipkinStorageConsumerAutoConfiguration.ElasticsearchStorageConsumer.class);
   }
 
   @Test
