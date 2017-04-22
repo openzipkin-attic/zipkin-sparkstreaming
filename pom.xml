@@ -46,9 +46,9 @@
     <spark.version>1.6.3</spark.version>
 
     <!-- versions coupled to zipkin -->
-    <zipkin.version>1.23.1</zipkin.version>
+    <zipkin.version>1.23.2</zipkin.version>
     <cassandra-driver-core.version>3.2.0</cassandra-driver-core.version>
-    <spring-boot.version>1.4.6.RELEASE</spring-boot.version>
+    <spring-boot.version>1.5.3.RELEASE</spring-boot.version>
   </properties>
 
   <name>Zipkin Spark Streaming (Parent)</name>

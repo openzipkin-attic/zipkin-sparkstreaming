@@ -24,7 +24,7 @@ import zipkin.sparkstreaming.autoconfigure.stream.kafka.ZipkinKafkaStreamFactory
 import zipkin.sparkstreaming.autoconfigure.stream.kafka.ZipkinKafkaStreamFactoryProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.boot.test.EnvironmentTestUtils.addEnvironment;
+import static org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment;
 
 public class ZipkinKafkaStreamFactoryAutoConfigurationTest {
   static final String KAFKA_BOOTSTRAP = "127.0.0.1:9092";
