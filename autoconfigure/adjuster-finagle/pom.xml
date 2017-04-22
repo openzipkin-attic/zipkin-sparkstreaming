@@ -18,7 +18,7 @@
   <parent>
     <groupId>io.zipkin.sparkstreaming</groupId>
     <artifactId>zipkin-sparkstreaming-autoconfigure-parent</artifactId>
-    <version>0.3.2</version>
+    <version>0.3.3-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>zipkin-sparkstreaming-autoconfigure-adjuster-finagle</artifactId>
