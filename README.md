@@ -91,7 +91,7 @@ A stream is a source of json or thrift encoded span messages.
 For example, a message stream could be a Kafka topic named "zipkin"
 
 Stream | Description
---- | --- | ---
+--- | ---
 [Kafka](./stream/kafka) | Ingests spans from a Kafka topic.
 
 ### Adjuster
@@ -103,7 +103,7 @@ scrub private data. This [example](https://github.com/openzipkin/zipkin-sparkstr
 Below is the list of prepackaged adjusters.
 
 Adjuster | Description
---- | --- | ---
+--- | ---
 [Finagle](./adjuster/finagle) | Fixes up spans reported by [Finagle](https://github.com/twitter/finagle/tree/develop/finagle-zipkin).
 
 ### Consumer
@@ -114,5 +114,5 @@ This could be a Zipkin storage component, like Elasticsearch, or another
 sink, such as a streaming visualization tool.
 
 Consumer | Description
---- | --- | ---
+--- | ---
 [Storage](./consumer/storage) | Writes spans to a Zipkin Storage Component
