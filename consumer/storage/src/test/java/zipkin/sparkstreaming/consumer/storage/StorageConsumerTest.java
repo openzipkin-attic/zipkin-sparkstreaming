@@ -21,15 +21,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import org.apache.log4j.Level;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import slf4jtest.LogLevel;
+import slf4jtest.Settings;
 import slf4jtest.TestLogger;
-import slf4jtest.TestLoggerFactory;
 import zipkin.TestObjects;
 import zipkin.storage.AsyncSpanConsumer;
 import zipkin.storage.Callback;
@@ -48,7 +47,7 @@ public class StorageConsumerTest {
   @Rule public ExpectedException thrown = ExpectedException.none();
 
   StorageComponent storage = mock(StorageComponent.class);
-  TestLogger logger = new TestLoggerFactory().getLogger("");
+  TestLogger logger = new Settings().enableAll().buildLogging().getLogger("");
   StorageConsumer storageConsumer = new StorageConsumer() {
     @Override Logger log() {
       return logger;
@@ -103,9 +102,9 @@ public class StorageConsumerTest {
 
     storageConsumer.accept(TestObjects.TRACE);
 
-    assertThat(logger.lines())
-        .extracting("level", "text")
-        .containsExactly(tuple(LogLevel.WarnLevel, "Dropped 3 spans: failed"));
+    assertThat(logger.lines()).hasSize(1);
+    assertThat(logger.lines().iterator().next().toString())
+        .startsWith("LogMessage(,WARN,Dropped 3 spans: failed");
     // TODO: test for acceptException
   }
 
@@ -120,9 +119,9 @@ public class StorageConsumerTest {
 
     storageConsumer.accept(TestObjects.TRACE);
 
-    assertThat(logger.lines())
-        .extracting("level", "text")
-        .containsExactly(tuple(LogLevel.WarnLevel, "Dropped 3 spans: failed"));
+    assertThat(logger.lines()).hasSize(1);
+    assertThat(logger.lines().iterator().next().toString())
+        .startsWith("LogMessage(,WARN,Dropped 3 spans: failed");
     // TODO: test for callbackException
   }
 
@@ -137,9 +136,9 @@ public class StorageConsumerTest {
 
     storageConsumer.accept(TestObjects.TRACE);
 
-    assertThat(logger.lines())
-        .extracting("level", "text")
-        .containsExactly(tuple(LogLevel.WarnLevel, "Dropped 3 spans: failed"));
+    assertThat(logger.lines()).hasSize(1);
+    assertThat(logger.lines().iterator().next().toString())
+        .startsWith("LogMessage(,WARN,Dropped 3 spans: failed");
     // TODO: test for callbackException
   }
 
