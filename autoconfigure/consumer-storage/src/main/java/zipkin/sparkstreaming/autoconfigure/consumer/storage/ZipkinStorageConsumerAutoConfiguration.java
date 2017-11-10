@@ -33,6 +33,7 @@ import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpSt
 import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchOkHttpAutoConfiguration;
 import zipkin.autoconfigure.storage.mysql.ZipkinMySQLStorageAutoConfiguration;
 import zipkin.autoconfigure.storage.mysql.ZipkinMySQLStorageProperties;
+import zipkin.internal.V2StorageComponent;
 import zipkin.sparkstreaming.consumer.storage.StorageConsumer;
 import zipkin.storage.StorageComponent;
 import zipkin.storage.cassandra.CassandraStorage;
@@ -64,7 +65,8 @@ public class ZipkinStorageConsumerAutoConfiguration {
   ) throws IOException {
     if (failFast) checkStorageOk(component);
 
-    if (component instanceof ElasticsearchHttpStorage) {
+    if (component instanceof V2StorageComponent
+        && ((V2StorageComponent) component).delegate() instanceof ElasticsearchHttpStorage) {
       return new ElasticsearchStorageConsumer(
           bf.getBean(ZipkinElasticsearchHttpStorageProperties.class));
     } else if (component instanceof CassandraStorage) {
@@ -96,7 +98,7 @@ public class ZipkinStorageConsumerAutoConfiguration {
     }
 
     @Override protected StorageComponent tryCompute() {
-      return properties.toBuilder(new OkHttpClient()).build();
+      return V2StorageComponent.create(properties.toBuilder(new OkHttpClient()).build());
     }
   }
 

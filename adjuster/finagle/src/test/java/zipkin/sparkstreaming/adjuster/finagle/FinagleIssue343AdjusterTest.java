@@ -13,9 +13,7 @@
  */
 package zipkin.sparkstreaming.adjuster.finagle;
 
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-
+import java.util.ArrayList;
 import org.junit.Test;
 import zipkin.Annotation;
 import zipkin.BinaryAnnotation;
@@ -24,7 +22,8 @@ import zipkin.Endpoint;
 import zipkin.Span;
 import zipkin.TestObjects;
 
-import java.util.ArrayList;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FinagleIssue343AdjusterTest {
   FinagleIssue343Adjuster adjuster = FinagleIssue343Adjuster.create();

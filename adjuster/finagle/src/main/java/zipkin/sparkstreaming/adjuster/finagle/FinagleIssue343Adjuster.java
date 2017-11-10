@@ -13,15 +13,13 @@
  */
 package zipkin.sparkstreaming.adjuster.finagle;
 
-import com.google.auto.value.AutoValue;
+import java.util.ArrayList;
+import java.util.List;
 import zipkin.Annotation;
 import zipkin.BinaryAnnotation;
 import zipkin.Span;
 import zipkin.internal.Util;
 import zipkin.sparkstreaming.Adjuster;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This adjuster handles a bug in finagle memcached library where the duration of a span ends

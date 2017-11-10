@@ -14,15 +14,15 @@
 package zipkin.sparkstreaming;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.Queue;
 import org.apache.spark.api.java.JavaRDD;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,7 +63,7 @@ public class ZipkinSparkStreamingJobAutoConfigurationTest {
 
     @Bean StreamFactory streamFactory() {
       return jsc -> {
-        Queue<JavaRDD<byte[]>> rddQueue = new LinkedList<>();
+        Queue<JavaRDD<byte[]>> rddQueue = new ArrayDeque<>();
         byte[] oneTrace = Codec.JSON.writeSpans(TestObjects.TRACE);
         rddQueue.add(jsc.sparkContext().parallelize(Collections.singletonList(oneTrace)));
         return jsc.queueStream(rddQueue);
