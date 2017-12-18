@@ -14,41 +14,36 @@
 package zipkin.sparkstreaming.autoconfigure.consumer.storage;
 
 import java.io.IOException;
-import okhttp3.OkHttpClient;
+import java.util.Iterator;
+import java.util.Properties;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.env.PropertySource;
 import zipkin.Component;
 import zipkin.autoconfigure.storage.cassandra.ZipkinCassandraStorageAutoConfiguration;
-import zipkin.autoconfigure.storage.cassandra.ZipkinCassandraStorageProperties;
 import zipkin.autoconfigure.storage.cassandra3.ZipkinCassandra3StorageAutoConfiguration;
-import zipkin.autoconfigure.storage.cassandra3.ZipkinCassandra3StorageProperties;
 import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpStorageAutoConfiguration;
-import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpStorageProperties;
 import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchOkHttpAutoConfiguration;
 import zipkin.autoconfigure.storage.mysql.ZipkinMySQLStorageAutoConfiguration;
-import zipkin.autoconfigure.storage.mysql.ZipkinMySQLStorageProperties;
 import zipkin.internal.V2StorageComponent;
 import zipkin.sparkstreaming.consumer.storage.StorageConsumer;
 import zipkin.storage.StorageComponent;
 import zipkin.storage.cassandra.CassandraStorage;
-import zipkin.storage.cassandra3.Cassandra3Storage;
 import zipkin.storage.elasticsearch.http.ElasticsearchHttpStorage;
 import zipkin.storage.mysql.MySQLStorage;
 
 @Configuration
 @ConditionalOnProperty("zipkin.storage.type")
-@EnableConfigurationProperties({
-    ZipkinCassandraStorageProperties.class,
-    ZipkinCassandra3StorageProperties.class,
-    ZipkinElasticsearchHttpStorageProperties.class,
-    ZipkinMySQLStorageProperties.class
-})
 @Import({
     ZipkinCassandraStorageAutoConfiguration.class,
     ZipkinCassandra3StorageAutoConfiguration.class,
@@ -64,20 +59,20 @@ public class ZipkinStorageConsumerAutoConfiguration {
       BeanFactory bf
   ) throws IOException {
     if (failFast) checkStorageOk(component);
-
-    if (component instanceof V2StorageComponent
-        && ((V2StorageComponent) component).delegate() instanceof ElasticsearchHttpStorage) {
-      return new ElasticsearchStorageConsumer(
-          bf.getBean(ZipkinElasticsearchHttpStorageProperties.class));
+    Properties properties = extractZipkinProperties(bf.getBean(ConfigurableEnvironment.class));
+    if (component instanceof V2StorageComponent) {
+      zipkin2.storage.StorageComponent v2Storage = ((V2StorageComponent) component).delegate();
+      if (v2Storage instanceof ElasticsearchHttpStorage) {
+        return new ElasticsearchStorageConsumer(properties);
+      } else if (v2Storage instanceof zipkin2.storage.cassandra.CassandraStorage) {
+        return new Cassandra3StorageConsumer(properties);
+      } else {
+        throw new UnsupportedOperationException(v2Storage + " not yet supported");
+      }
     } else if (component instanceof CassandraStorage) {
-      return new CassandraStorageConsumer(
-          bf.getBean(ZipkinCassandraStorageProperties.class));
-    } else if (component instanceof Cassandra3Storage) {
-      return new Cassandra3StorageConsumer(
-          bf.getBean(ZipkinCassandra3StorageProperties.class));
+      return new CassandraStorageConsumer(properties);
     } else if (component instanceof MySQLStorage) {
-      return new MySQLStorageConsumer(
-          bf.getBean(ZipkinMySQLStorageProperties.class));
+      return new MySQLStorageConsumer(properties);
     } else {
       throw new UnsupportedOperationException(component + " not yet supported");
     }
@@ -90,54 +85,85 @@ public class ZipkinStorageConsumerAutoConfiguration {
     component.close(); // we don't use this directly as job instantiates their own
   }
 
-  static final class ElasticsearchStorageConsumer extends StorageConsumer {
-    final ZipkinElasticsearchHttpStorageProperties properties;
-
-    ElasticsearchStorageConsumer(ZipkinElasticsearchHttpStorageProperties properties) {
-      this.properties = properties;
+  static final class ElasticsearchStorageConsumer extends AutoConfigurationStorageConsumer {
+    ElasticsearchStorageConsumer(Properties properties) {
+      super(properties);
     }
 
-    @Override protected StorageComponent tryCompute() {
-      return V2StorageComponent.create(properties.toBuilder(new OkHttpClient()).build());
-    }
-  }
-
-  static final class CassandraStorageConsumer extends StorageConsumer {
-    final ZipkinCassandraStorageProperties properties;
-
-    CassandraStorageConsumer(ZipkinCassandraStorageProperties properties) {
-      this.properties = properties;
-    }
-
-    @Override protected StorageComponent tryCompute() {
-      return properties.toBuilder().build();
+    @Override void registerAutoConfiguration(AnnotationConfigApplicationContext context) {
+      context.register(ZipkinElasticsearchOkHttpAutoConfiguration.class);
+      context.register(ZipkinElasticsearchHttpStorageAutoConfiguration.class);
     }
   }
 
-  static final class Cassandra3StorageConsumer extends StorageConsumer {
-    final ZipkinCassandra3StorageProperties properties;
-
-    Cassandra3StorageConsumer(ZipkinCassandra3StorageProperties properties) {
-      this.properties = properties;
+  static final class CassandraStorageConsumer extends AutoConfigurationStorageConsumer {
+    CassandraStorageConsumer(Properties properties) {
+      super(properties);
     }
 
-    @Override protected StorageComponent tryCompute() {
-      return properties.toBuilder().build();
+    @Override void registerAutoConfiguration(AnnotationConfigApplicationContext context) {
+      context.register(ZipkinCassandraStorageAutoConfiguration.class);
     }
   }
 
-  static final class MySQLStorageConsumer extends StorageConsumer {
-    final ZipkinMySQLStorageProperties properties;
+  static final class Cassandra3StorageConsumer extends AutoConfigurationStorageConsumer {
+    Cassandra3StorageConsumer(Properties properties) {
+      super(properties);
+    }
 
-    MySQLStorageConsumer(ZipkinMySQLStorageProperties properties) {
+    @Override void registerAutoConfiguration(AnnotationConfigApplicationContext context) {
+      context.register(ZipkinCassandra3StorageAutoConfiguration.class);
+    }
+  }
+
+  static final class MySQLStorageConsumer extends AutoConfigurationStorageConsumer {
+    MySQLStorageConsumer(Properties properties) {
+      super(properties);
+    }
+
+    @Override void registerAutoConfiguration(AnnotationConfigApplicationContext context) {
+      context.register(ZipkinMySQLStorageAutoConfiguration.class);
+    }
+  }
+
+  static Properties extractZipkinProperties(ConfigurableEnvironment env) {
+    Properties properties = new Properties();
+    Iterator<PropertySource<?>> it = env.getPropertySources().iterator();
+    while (it.hasNext()) {
+      PropertySource<?> next = it.next();
+      if (!(next instanceof EnumerablePropertySource)) continue;
+      EnumerablePropertySource source = (EnumerablePropertySource) next;
+      for (String name : source.getPropertyNames()) {
+        if (name.startsWith("zipkin")) properties.put(name, source.getProperty(name));
+      }
+    }
+    return properties;
+  }
+
+  /**
+   * This holds only serializable state, in this case properties used to re-construct the zipkin
+   * storage component later.
+   */
+  static abstract class AutoConfigurationStorageConsumer extends StorageConsumer {
+    final Properties properties;
+
+    AutoConfigurationStorageConsumer(Properties properties) {
       this.properties = properties;
     }
 
     @Override protected StorageComponent tryCompute() {
-      return MySQLStorage.builder()
-          .executor(Runnable::run) // intentionally blocking
-          .datasource(properties.toDataSource()).build();
+      AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+      PropertiesPropertySource source = new PropertiesPropertySource("consumer", properties);
+      context.getEnvironment().getPropertySources().addLast(source);
+
+      context.register(PropertyPlaceholderAutoConfiguration.class);
+      registerAutoConfiguration(context);
+      context.refresh();
+
+      return context.getBean(StorageComponent.class);
     }
+
+    abstract void registerAutoConfiguration(AnnotationConfigApplicationContext context);
   }
 }
 
