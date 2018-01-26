@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2017 The OpenZipkin Authors
+    Copyright 2017-2018 The OpenZipkin Authors
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
     in compliance with the License. You may obtain a copy of the License at
@@ -46,9 +46,9 @@
     <spark.version>1.6.3</spark.version>
 
     <!-- versions coupled to zipkin -->
-    <zipkin.version>2.4.1</zipkin.version>
-    <cassandra-driver-core.version>3.3.1</cassandra-driver-core.version>
-    <spring-boot.version>1.5.8.RELEASE</spring-boot.version>
+    <zipkin.version>2.4.5</zipkin.version>
+    <cassandra-driver-core.version>3.4.0</cassandra-driver-core.version>
+    <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
   </properties>
 
   <name>Zipkin Spark Streaming (Parent)</name>
@@ -198,7 +198,7 @@
       <dependency>
         <groupId>com.google.auto.value</groupId>
         <artifactId>auto-value</artifactId>
-        <version>1.5.2</version>
+        <version>1.5.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -231,7 +231,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.8.0</version>
+      <version>3.9.0</version>
       <scope>test</scope>
     </dependency>
 
@@ -247,7 +247,7 @@
   <build>
     <pluginManagement>
       <plugins>
-        <!-- mvn -N io.takari:maven:wrapper -Dmaven=3.5.0 -->
+        <!-- mvn -N io.takari:maven:wrapper -Dmaven=3.5.2 -->
         <plugin>
           <groupId>io.takari</groupId>
           <artifactId>maven</artifactId>
@@ -278,7 +278,7 @@
           <dependency>
             <groupId>com.google.errorprone</groupId>
             <artifactId>error_prone_core</artifactId>
-            <version>2.1.2</version>
+            <version>2.2.0</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -286,7 +286,7 @@
       <plugin>
         <groupId>net.orfjackal.retrolambda</groupId>
         <artifactId>retrolambda-maven-plugin</artifactId>
-        <version>2.5.1</version>
+        <version>2.5.3</version>
         <executions>
           <execution>
             <goals>
