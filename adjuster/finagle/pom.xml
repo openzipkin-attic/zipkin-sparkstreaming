@@ -18,7 +18,7 @@
   <parent>
     <groupId>io.zipkin.sparkstreaming</groupId>
     <artifactId>zipkin-sparkstreaming-adjuster-parent</artifactId>
-    <version>0.3.8</version>
+    <version>0.3.9-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
